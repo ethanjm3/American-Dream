@@ -52,9 +52,12 @@ PRICE_INDEXES: dict[str, IndexSpec] = {
     "AUTO_FEES": IndexSpec(
         "Motor vehicle fees, spliced to CPI-U before 1998",
         ("bls:CUUR0000SETF", "bls:CUUR0000SA0")),
+    # Before 1991 the only CPI including childcare is dominated by college
+    # tuition (x2.7 in 1980-91 vs x1.5 for wages); childcare is labor-
+    # intensive, so it is carried back on average hourly earnings instead.
     "CHILDCARE": IndexSpec(
-        "Day care and preschool, spliced to tuition/school fees/childcare before 1991",
-        ("bls:CUUR0000SEEB03", "bls:CUUR0000SEEB")),
+        "Day care and preschool, spliced to average hourly earnings (production & nonsupervisory) before 1991",
+        ("bls:CUUR0000SEEB03", "fred:AHETPI")),
     "WIRELESS": IndexSpec(
         "Wireless telephone services, spliced to BEA PCE telecommunication services before 1998",
         ("bls:CUUR0000SEED03", "fred:DTCSRG3A086NBEA")),

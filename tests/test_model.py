@@ -58,3 +58,21 @@ def test_anchor_terms_parse():
 
 def test_loan_cost_factor_zero_rate_limit():
     assert components._loan_cost_factor(np.array([1e-9]))[0] == pytest.approx(0, abs=1e-6)
+
+
+def test_browser_model_matches_python():
+    """The interactive page's JS model reproduces the Python baseline."""
+    import json
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    data_file = root / "web" / "adi_data.json"
+    if not shutil.which("node") or not data_file.exists():
+        pytest.skip("node or web/adi_data.json not available")
+    out = subprocess.run(["node", str(root / "tests/js/parity.js"), str(root / "web/template.html"),
+                          str(data_file)], capture_output=True, text=True, check=True).stdout
+    for line in out.strip().splitlines():
+        r = json.loads(line)
+        assert r["cost"] < 1e-3 and r["retirement"] < 1e-3, r
