@@ -1,0 +1,56 @@
+# Share of private-sector wage and salary workers participating in a
+# defined-benefit pension plan.
+# 1980-1998: U.S. Dept. of Labor, Private Pension Plan Bulletin Historical
+#   Tables (Table E4): workers in DB-only plus DB-and-DC plans / private wage
+#   and salary workers.
+# 1999-2025: BLS National Compensation Survey / Employee Benefits Survey,
+#   share of private industry workers participating in DB plans (March),
+#   series NBU29000000000000026291; 2001-2002 interpolated.
+# The two sources agree closely where they overlap (1999: 20.5% vs 21%).
+year,db_share,source
+1980,0.384,DOL Form 5500 bulletin Table E4
+1981,0.374,DOL Form 5500 bulletin Table E4
+1982,0.361,DOL Form 5500 bulletin Table E4
+1983,0.354,DOL Form 5500 bulletin Table E4
+1984,0.347,DOL Form 5500 bulletin Table E4
+1985,0.327,DOL Form 5500 bulletin Table E4
+1986,0.316,DOL Form 5500 bulletin Table E4
+1987,0.31,DOL Form 5500 bulletin Table E4
+1988,0.301,DOL Form 5500 bulletin Table E4
+1989,0.287,DOL Form 5500 bulletin Table E4
+1990,0.277,DOL Form 5500 bulletin Table E4
+1991,0.27,DOL Form 5500 bulletin Table E4
+1992,0.261,DOL Form 5500 bulletin Table E4
+1993,0.256,DOL Form 5500 bulletin Table E4
+1994,0.242,DOL Form 5500 bulletin Table E4
+1995,0.229,DOL Form 5500 bulletin Table E4
+1996,0.222,DOL Form 5500 bulletin Table E4
+1997,0.211,DOL Form 5500 bulletin Table E4
+1998,0.211,DOL Form 5500 bulletin Table E4
+1999,0.21,BLS NCS / EBS
+2000,0.19,BLS NCS / EBS
+2001,0.1933,interpolated
+2002,0.1967,interpolated
+2003,0.2,BLS NCS / EBS
+2004,0.21,BLS NCS / EBS
+2005,0.21,BLS NCS / EBS
+2006,0.2,BLS NCS / EBS
+2007,0.2,BLS NCS / EBS
+2008,0.2,BLS NCS / EBS
+2009,0.2,BLS NCS / EBS
+2010,0.19,BLS NCS / EBS
+2011,0.18,BLS NCS / EBS
+2012,0.17,BLS NCS / EBS
+2013,0.16,BLS NCS / EBS
+2014,0.16,BLS NCS / EBS
+2015,0.16,BLS NCS / EBS
+2016,0.15,BLS NCS / EBS
+2017,0.15,BLS NCS / EBS
+2018,0.13,BLS NCS / EBS
+2019,0.12,BLS NCS / EBS
+2020,0.11,BLS NCS / EBS
+2021,0.11,BLS NCS / EBS
+2022,0.11,BLS NCS / EBS
+2023,0.11,BLS NCS / EBS
+2024,0.1,BLS NCS / EBS
+2025,0.09,BLS NCS / EBS
