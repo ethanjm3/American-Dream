@@ -1,0 +1,19 @@
+# Effective property tax rate on owner-occupied homes (tax / market value).
+# 1980-1987: ACIR, Significant Features of Fiscal Federalism (1980-81 Table 37;
+#   1989 Vol. 1 Table 33), existing single-family homes with FHA-insured
+#   mortgages, U.S. average (series ends 1987).
+# 2000: Census 2000 SF3, aggregate real estate taxes / aggregate value.
+# 2023-2024: ACS 1-year, aggregate real estate taxes / aggregate value
+#   (B25090 / B25082). Years in between are interpolated by the model.
+year,rate
+1980,0.0128
+1981,0.0126
+1982,0.0126
+1983,0.0131
+1984,0.0123
+1985,0.0121
+1986,0.0116
+1987,0.0115
+2000,0.01127
+2023,0.00909
+2024,0.00888

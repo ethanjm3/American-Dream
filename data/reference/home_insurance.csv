@@ -1,0 +1,25 @@
+# Average homeowners insurance premium, HO-3 policy, current dollars.
+# Source: NAIC Dwelling Fire, Homeowners Owner-Occupied, and Homeowners
+#   Tenant and Condominium/Cooperative Unit Owner's Insurance Report.
+#   2008-2022 as reprinted by the Insurance Information Institute
+#   (https://www.iii.org/fact-statistic/facts-statistics-homeowners-and-renters-insurance);
+#   2023 from the NAIC report published July 2026, Table 4.
+# Earlier years are carried back on the CPI for tenants' and household
+# insurance (1998+) and core CPI; 2024+ forward on the same CPI.
+year,ho3_premium
+2008,830
+2009,880
+2010,909
+2011,979
+2012,1034
+2013,1096
+2014,1132
+2015,1173
+2016,1192
+2017,1211
+2018,1249
+2019,1272
+2020,1311
+2021,1411
+2022,1569
+2023,1737

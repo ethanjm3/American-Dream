@@ -1,0 +1,581 @@
+<title>American Dream Index</title>
+<meta name="description" content="What it costs a family of four to live the American Dream, 1980 to today, against what families earn.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Public+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: a single reading column for the story, widening to a two-up chart
+   grid on desktop; the assumptions panel sits in one row above the charts. */
+:root {
+  --bg: #f6f7f9;            /* page: cool paper, faint blue bias */
+  --surface: #fcfcfb;       /* chart cards */
+  --ink: #0f1620;
+  --ink-2: #4a5260;
+  --muted: #7d8592;
+  --rule: #dfe3ea;
+  --axis: #c3c8d1;
+  --accent: #2a78d6;        /* series 1 / interactive accent */
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
+  --focus: #2a78d6;
+  --tip-bg: #0f1620; --tip-ink: #f3f5f8; --tip-ink-2: #b9c0cc;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --step--1: 0.8125rem; --step-0: 1rem; --step-1: 1.25rem; --step-2: 1.75rem; --step-3: 2.75rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --surface: #161a20; --ink: #eef1f5; --ink-2: #b8bfca; --muted: #8a919c;
+    --rule: #262c35; --axis: #3a414c; --accent: #3987e5;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+    --focus: #6aa8f0; --tip-bg: #eef1f5; --tip-ink: #0f1620; --tip-ink-2: #4a5260;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --surface: #161a20; --ink: #eef1f5; --ink-2: #b8bfca; --muted: #8a919c;
+  --rule: #262c35; --axis: #3a414c; --accent: #3987e5;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --focus: #6aa8f0; --tip-bg: #eef1f5; --tip-ink: #0f1620; --tip-ink-2: #4a5260;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: var(--step-0); line-height: 1.55; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: max(16px, 3vw); padding-block: 40px 64px; display: grid; gap: 32px; }
+h1, h2, h3 { font-family: var(--font-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: var(--step-3); font-weight: 800; line-height: 1.02; }
+h2 { font-size: var(--step-1); font-weight: 700; line-height: 1.2; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-size: var(--step--1); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+header { display: grid; gap: 14px; }
+.lede { font-size: var(--step-1); line-height: 1.45; color: var(--ink-2); max-width: 60ch; }
+.lede strong { color: var(--ink); font-weight: 700; }
+
+.figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.fig { border-top: 2px solid var(--ink); padding-top: 10px; display: grid; gap: 2px; align-content: start; }
+.fig .v { font-family: var(--font-display); font-size: var(--step-2); font-weight: 700; line-height: 1.1; }
+.fig .l { font-size: var(--step--1); color: var(--ink-2); }
+
+.controls { display: grid; gap: 18px; padding: 18px; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; }
+.controls-row { display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: end; }
+.seg { display: grid; gap: 6px; }
+.seg-label, .slider label { font-size: var(--step--1); font-weight: 600; color: var(--ink-2); }
+select.yard { font: inherit; font-size: var(--step--1); padding: 7px 10px; border: 1px solid var(--axis); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: 100%; }
+.seg-buttons { display: inline-flex; border: 1px solid var(--axis); border-radius: 8px; overflow: hidden; }
+.seg-buttons button { font: inherit; font-size: var(--step--1); padding: 7px 12px; border: 0; background: transparent; color: var(--ink-2); cursor: pointer; }
+.seg-buttons button + button { border-left: 1px solid var(--axis); }
+.seg-buttons button[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 600; }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 24px; }
+.slider { display: grid; gap: 4px; }
+.slider .row { display: flex; justify-content: space-between; gap: 8px; }
+.slider output { font-variant-numeric: tabular-nums; font-size: var(--step--1); font-weight: 700; }
+.slider input { width: 100%; accent-color: var(--accent); }
+.slider .hint { font-size: 0.75rem; color: var(--muted); }
+.reset { font: inherit; font-size: var(--step--1); background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; justify-self: start; }
+
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 20px; }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 18px 18px 12px; display: grid; gap: 8px; min-width: 0; position: relative; }
+.card.wide { grid-column: 1 / -1; }
+.card .sub { font-size: var(--step--1); color: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--step--1); color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.key-line { width: 16px; height: 2px; border-radius: 1px; display: inline-block; }
+.key-box { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+svg.chart text { font-family: var(--font-body); fill: var(--muted); font-size: 11px; }
+svg.chart .grid { stroke: var(--rule); stroke-width: 1; }
+svg.chart .base { stroke: var(--axis); stroke-width: 1; }
+svg.chart .ref { stroke: var(--ink-2); stroke-width: 1; }
+svg.chart .ref-label { fill: var(--ink-2); }
+svg.chart .end-label { fill: var(--ink-2); font-weight: 600; }
+svg.chart .cross { stroke: var(--ink-2); stroke-width: 1; }
+.tip { position: absolute; pointer-events: none; background: var(--tip-bg); color: var(--tip-ink); border-radius: 8px; padding: 8px 10px; font-size: var(--step--1); line-height: 1.35; min-width: 170px; box-shadow: 0 4px 18px rgba(0,0,0,.18); z-index: 5; }
+.tip .t { color: var(--tip-ink-2); margin-bottom: 4px; font-weight: 600; }
+.tip .r { display: grid; grid-template-columns: 14px 1fr; gap: 0 6px; align-items: center; }
+.tip .r b { font-variant-numeric: tabular-nums; }
+.tip .r small { grid-column: 2; color: var(--tip-ink-2); font-size: 0.75rem; margin-top: -2px; }
+
+details.table { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 18px; }
+details.table summary { cursor: pointer; font-weight: 600; }
+.table-scroll { overflow-x: auto; margin-top: 12px; }
+table { border-collapse: collapse; font-size: var(--step--1); font-variant-numeric: tabular-nums; width: 100%; }
+th, td { text-align: right; padding: 5px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--ink-2); font-weight: 600; position: sticky; top: 0; background: var(--surface); }
+
+.method { display: grid; gap: 14px; }
+.method-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 14px 32px; }
+.method h3 { font-size: var(--step-0); font-weight: 700; margin-bottom: 4px; }
+.method p, .method li { font-size: 0.9375rem; color: var(--ink-2); }
+.method ul { margin: 0; padding-left: 18px; }
+.method a { color: var(--accent); }
+footer { font-size: var(--step--1); color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
+@media (max-width: 560px) { h1 { font-size: 2.1rem; } .lede { font-size: 1.08rem; } }
+@media (prefers-reduced-motion: no-preference) { .card svg path.series { transition: d .25s ease; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">A family of four, 1980 to <span data-latest-year></span></div>
+    <h1>American Dream Index</h1>
+    <p class="lede" id="lede">Loading…</p>
+  </header>
+
+  <section class="figures" id="figures" aria-label="Headline figures"></section>
+
+  <section class="controls" aria-label="Assumptions">
+    <div class="controls-row">
+      <div class="seg">
+        <span class="seg-label" id="lbl-scen">Household</span>
+        <div class="seg-buttons" role="group" aria-labelledby="lbl-scen">
+          <button type="button" id="scen-A" data-scen="A" aria-pressed="true">Two earners, paid childcare</button>
+          <button type="button" id="scen-B" data-scen="B" aria-pressed="false">One earner, parent at home</button>
+        </div>
+      </div>
+      <div class="seg">
+        <span class="seg-label" id="lbl-dollars">Dollars</span>
+        <div class="seg-buttons" role="group" aria-labelledby="lbl-dollars">
+          <button type="button" id="dol-real" data-dollars="real" aria-pressed="true"><span data-latest-year></span> dollars</button>
+          <button type="button" id="dol-nominal" data-dollars="nominal" aria-pressed="false">Dollars of the day</button>
+        </div>
+      </div>
+      <div class="seg">
+        <label class="seg-label" for="in-yard">Compare with the income of</label>
+        <select id="in-yard" class="yard">
+          <option value="married_couple">Median married couple</option>
+          <option value="married_with_children">Median married couple with children</option>
+          <option value="household">Median household</option>
+          <option value="head_25_34">Median family headed by a 25–34-year-old</option>
+        </select>
+      </div>
+    </div>
+    <div class="sliders">
+      <div class="slider">
+        <div class="row"><label for="in-retire">Retire at age</label><output id="out-retire" for="in-retire"></output></div>
+        <input type="range" id="in-retire" min="55" max="62" step="0.5">
+        <span class="hint">Social Security is claimed at 62.</span>
+      </div>
+      <div class="slider">
+        <div class="row"><label for="in-return">Real return while saving</label><output id="out-return" for="in-return"></output></div>
+        <input type="range" id="in-return" min="0.02" max="0.07" step="0.0025">
+        <span class="hint">After inflation. Retirement-phase return stays 1.5 points lower.</span>
+      </div>
+      <div class="slider">
+        <div class="row"><label for="in-home">Home price vs. national typical</label><output id="out-home" for="in-home"></output></div>
+        <input type="range" id="in-home" min="0.5" max="2.5" step="0.05">
+        <span class="hint">Try 60% for a small Midwest metro, 200% for a coastal one.</span>
+      </div>
+      <div class="slider">
+        <div class="row"><label for="in-down">Down payment</label><output id="out-down" for="in-down"></output></div>
+        <input type="range" id="in-down" min="0.03" max="0.3" step="0.01">
+        <span class="hint">Saved over the 10 years before buying.</span>
+      </div>
+      <div class="slider">
+        <div class="row"><label for="in-care">Childcare paid (two-earner family)</label><output id="out-care" for="in-care"></output></div>
+        <input type="range" id="in-care" min="0" max="1" step="0.05">
+        <span class="hint">100% = both kids in full-time centre care.</span>
+      </div>
+    </div>
+    <button type="button" class="reset" id="reset">Reset to baseline assumptions</button>
+  </section>
+
+  <section class="charts" aria-label="Charts">
+    <figure class="card wide" id="card-cost" style="margin:0">
+      <h2>What the lifestyle costs, and what families earn</h2>
+      <div class="sub" id="sub-cost"></div>
+      <div class="legend" id="leg-cost"></div>
+      <svg class="chart" id="ch-cost" role="img" aria-labelledby="card-cost-title"></svg>
+    </figure>
+    <figure class="card" id="card-share" style="margin:0">
+      <h2 id="share-title">Share of median married-couple income</h2>
+      <div class="sub" id="share-sub"></div>
+      <div class="legend" id="leg-share"></div>
+      <svg class="chart" id="ch-share" role="img" aria-label="Share of income chart"></svg>
+    </figure>
+    <figure class="card" id="card-earners" style="margin:0">
+      <h2>Median full-time paychecks needed</h2>
+      <div class="sub">Pre-tax cost ÷ median annual earnings of one full-time worker.</div>
+      <div class="legend" id="leg-earners"></div>
+      <svg class="chart" id="ch-earners" role="img" aria-label="Earners needed chart"></svg>
+    </figure>
+    <figure class="card wide" id="card-mix" style="margin:0">
+      <h2>Where the money goes</h2>
+      <div class="sub" id="sub-mix"></div>
+      <div class="legend" id="leg-mix"></div>
+      <svg class="chart" id="ch-mix" role="img" aria-label="Cost breakdown by category"></svg>
+    </figure>
+  </section>
+
+  <details class="table">
+    <summary>Table view: every year</summary>
+    <div class="table-scroll"><table id="tbl"></table></div>
+  </details>
+
+  <section class="method" aria-labelledby="m-h">
+    <h2 id="m-h">What's in the index</h2>
+    <div class="method-grid">
+      <div><h3>The lifestyle</h3><p>A typical existing home (the median home is about 3 bed / 2 bath) bought with a 30-year mortgage, two new cars driven 15,000 miles a year, two children in full-time centre care, groceries and meals out, a 60" TV and a full set of kitchen and laundry appliances, two smartphones, home internet and cable, employer health coverage, a domestic family trip every year and an international one every five years, and saving enough to retire at 55–60.</p></div>
+      <div><h3>How costs are dated</h3><p>House prices follow the FHFA repeat-sales index and Freddie Mac mortgage rates. Health premiums are KFF's employer survey. Other items start from a 2024 national average (AAA, Child Care Aware, BLS Consumer Expenditure Survey) and move with the matching CPI. Phones, TVs, appliances, clothing and entertainment follow what married couples with children actually spent each year, because quality-adjusted prices for electronics imply a 2024 TV would have cost $50,000 in 1980.</p></div>
+      <div><h3>Taxes and retirement</h3><p>The family pays federal and state income tax and FICA, computed with NBER TAXSIM for every state and weighted by population; mortgage interest and property tax are itemized when that beats the standard deduction. Retirement saving funds spending from the retirement age through the longer-lived spouse's life expectancy plus three years, net of Social Security claimed at 62 and expected pension income, including private health insurance until Medicare.</p></div>
+      <div><h3>Cheaper for whom?</h3><p>Measured in one worker's paychecks, the lifestyle cost about the same in 2025 (3.5) as in the mid-1980s (3.4–3.6). It looks cheaper against married couples' income because couples now bring in 2.1 paychecks instead of 1.7, and because married parents are a smaller, better-off group (17% of households, down from 31%). Childcare, health insurance and retirement take more paychecks; cars, clothes, food and taxes take fewer. Since 2019 the cost per paycheck is up 6%, all of it housing.</p></div>
+      <div><h3>Income benchmarks</h3><p>Census CPS median household and married-couple family income (current dollars), and BLS median usual weekly earnings of full-time workers × 52. The interactive version recomputes housing, childcare and retirement in your browser and re-solves taxes on each year's TAXSIM schedule, holding itemized deductions at baseline.</p></div>
+    </div>
+  </section>
+
+  <footer>Sources: FHFA House Price Index; Freddie Mac PMMS; BLS CPI-U and Consumer Expenditure Survey; Census CPS ASEC historical income tables; BLS weekly earnings; KFF Employer Health Benefits Survey; AAA Your Driving Costs; Child Care Aware of America; NBER TAXSIM 35; SSA and CDC life tables. Full method and code: github.com/ethanjm3/American-Dream.</footer>
+</div>
+
+<script>
+const ADI = /*__ADI_DATA__*/null;
+(function () {
+  "use strict";
+  const D = ADI, Y = D.per_year.year, N = Y.length, A0 = D.assumptions;
+  const LATEST = Y[N - 1], FIRST = Y[0];
+  document.querySelectorAll("[data-latest-year]").forEach(el => el.textContent = LATEST);
+  const CATS = ["Housing", "Transportation", "Childcare", "Food", "Healthcare", "Retirement saving", "Taxes", "Everything else"];
+  const ELSE = ["Household goods", "Technology", "Vacations", "Other necessities"];
+  const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const SERIES = () => [1,2,3,4,5,6,7,8].map(i => cssVar("--s" + i));
+
+  const YARD = {
+    married_couple: { col: "median_married_couple", label: "median married-couple", who: "the median married couple", src: "Census F-7" },
+    married_with_children: { col: "median_married_with_children", label: "median married-with-children", who: "the median married couple with children", src: "Census F-10" },
+    household: { col: "median_household", label: "median household", who: "the median household", src: "Census H-5" },
+    head_25_34: { col: "median_family_head_25_34", label: "median young-family", who: "the median family headed by a 25–34-year-old", src: "Census F-11" },
+  };
+  const DEFAULTS = { scen: "A", dollars: "real", yard: "married_couple", retire: A0.retire_age, ret: A0.real_return_accumulation, home: 1, down: A0.down_payment, care: 1 };
+  let S = Object.assign({}, DEFAULTS);
+  try { const saved = JSON.parse(localStorage.getItem("adi-state") || "null"); if (saved) S = Object.assign(S, saved); } catch (e) {}
+
+  // ---------------------------------------------------------------- model
+  function pmt(principal, ratePct, years) {
+    const r = ratePct / 1200, n = years * 12;
+    return principal * r / (1 - Math.pow(1 + r, -n)) * 12;
+  }
+  function interp(x, xs, ys) {
+    const n = xs.length;
+    if (x <= xs[0]) return ys[0] + (x - xs[0]) * (ys[1] - ys[0]) / (xs[1] - xs[0]);
+    if (x >= xs[n - 1]) return ys[n - 1] + (x - xs[n - 1]) * (ys[n - 1] - ys[n - 2]) / (xs[n - 1] - xs[n - 2]);
+    let i = 1; while (xs[i] < x) i++;
+    return ys[i - 1] + (x - xs[i - 1]) * (ys[i] - ys[i - 1]) / (xs[i] - xs[i - 1]);
+  }
+  function grossUp(need, year, scen) {
+    const g = D.tax[scen][year], net = g.gross.map((x, i) => x - g.tax[i]);
+    const gross = interp(need, net, g.gross);
+    return { gross, tax: gross - need };
+  }
+  function retirementSaving(i, scen, retire, rAcc) {
+    const P = D.per_year, rRet = Math.max(rAcc - 0.015, 0.0);
+    const earners = scen === "A" ? 2 : 1;
+    const ss = scen === "A" ? P.ss_A[i] : P.ss_B[i];
+    const pension = P.db_share[i] * A0.db_pension_replacement * P.median_ft_earnings[i] * earners;
+    let egg = 0;
+    for (let age = retire; age < P.plan_to_age[i]; age += 1) {
+      let need = P.retired_core[i] + (age < 65 ? P.health_pre65[i] : P.health_65plus[i]);
+      if (age >= A0.ss_claim_age) need -= ss + pension;
+      egg += Math.max(need, 0) * Math.pow(1 + rRet, -(age - retire));
+    }
+    const n = retire - A0.start_saving_age;
+    const annuity = (Math.pow(1 + rAcc, n) - 1) / rAcc;
+    return egg / annuity;
+  }
+  function compute(scen) {
+    const P = D.per_year, it = P.items, out = [];
+    for (let i = 0; i < N; i++) {
+      const y = Y[i], price = P.home_price[i] * S.home;
+      const items = {};
+      for (const k in it) items[k] = it[k][i];
+      items.mortgage_payment = pmt(price * (1 - S.down), P.mortgage_rate[i], A0.mortgage_term_years);
+      items.down_payment_saving = price * S.down / A0.down_payment_save_years;
+      items.property_tax = price * P.property_tax_rate[i];
+      items.home_maintenance = price * A0.maintenance_rate;
+      items.childcare = scen === "A" ? it.childcare[i] * S.care : 0;
+      const cat = {};
+      for (const k in items) { const c = D.category[k]; cat[c] = (cat[c] || 0) + items[k]; }
+      cat["Retirement saving"] = retirementSaving(i, scen, S.retire, S.ret);
+      const need = Object.values(cat).reduce((a, b) => a + b, 0);
+      const g = grossUp(need, y, scen);
+      cat["Taxes"] = g.tax;
+      cat["Everything else"] = ELSE.reduce((a, c) => a + (cat[c] || 0), 0);
+      out.push({ year: y, cost: g.gross, cat,
+        pctMarried: g.gross / P.median_married_couple[i],
+        pctHousehold: g.gross / P.median_household[i],
+        earners: g.gross / P.median_ft_earnings[i] });
+    }
+    return out;
+  }
+
+  // ------------------------------------------------------------- helpers
+  const deflate = i => S.dollars === "real" ? D.per_year.cpi[i] : 1;
+  const money = v => {
+    const a = Math.abs(v);
+    if (a >= 1e6) return "$" + (v / 1e6).toFixed(2) + "M";
+    if (a >= 1e3) return "$" + Math.round(v / 1e3).toLocaleString() + "K";
+    return "$" + Math.round(v);
+  };
+  const moneyFull = v => "$" + Math.round(v).toLocaleString();
+  const pct = v => Math.round(v * 100) + "%";
+  const NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, parent, text) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function niceMax(v) {
+    const p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p;
+    const step = m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10;
+    return step * p;
+  }
+  function ticks(max, n) {
+    const raw = max / n, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p;
+    const out = []; for (let v = 0; v <= max + 1e-9; v += step) out.push(v);
+    return out;
+  }
+  function legend(id, rows, kind) {
+    const host = document.getElementById(id); host.textContent = "";
+    rows.forEach(r => {
+      const s = document.createElement("span"), k = document.createElement("i");
+      k.className = kind === "box" ? "key-box" : "key-line"; k.style.background = r.color;
+      s.appendChild(k); s.appendChild(document.createTextNode(r.label)); host.appendChild(s);
+    });
+  }
+  function tooltip(card) {
+    let t = card.querySelector(".tip");
+    if (!t) { t = document.createElement("div"); t.className = "tip"; t.hidden = true; card.appendChild(t); }
+    return t;
+  }
+  function fillTip(t, title, rows) {
+    t.textContent = "";
+    const h = document.createElement("div"); h.className = "t"; h.textContent = title; t.appendChild(h);
+    rows.forEach(r => {
+      const row = document.createElement("div"); row.className = "r";
+      const k = document.createElement("i"); k.className = r.box ? "key-box" : "key-line"; k.style.background = r.color;
+      const b = document.createElement("b"); b.textContent = r.value;
+      row.appendChild(k); row.appendChild(b);
+      if (r.label) { const sm = document.createElement("small"); sm.textContent = r.label; row.appendChild(sm); }
+      t.appendChild(row);
+    });
+  }
+  function placeTip(card, t, svg, px, py) {
+    const cb = card.getBoundingClientRect(), sb = svg.getBoundingClientRect();
+    let x = sb.left - cb.left + px + 14, y = sb.top - cb.top + py - 10;
+    t.hidden = false;
+    const w = t.offsetWidth;
+    if (x + w > cb.width - 8) x = sb.left - cb.left + px - w - 14;
+    t.style.left = Math.max(8, x) + "px"; t.style.top = Math.max(8, y) + "px";
+  }
+
+  // ---------------------------------------------------------- line chart
+  function lineChart(opts) {
+    const svg = document.getElementById(opts.id), card = svg.closest(".card");
+    const W = svg.clientWidth || 600, H = opts.height || 300;
+    const m = { l: 52, r: opts.rightPad || 58, t: 14, b: 26 };
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.textContent = "";
+    const iw = W - m.l - m.r, ih = H - m.t - m.b;
+    let maxV = 0; opts.series.forEach(s => s.values.forEach(v => { if (v > maxV) maxV = v; }));
+    (opts.refs || []).forEach(r => { if (r.value > maxV) maxV = r.value; });
+    maxV = niceMax(maxV * 1.05);
+    const x = i => m.l + (i / (N - 1)) * iw, yv = v => m.t + ih - (v / maxV) * ih;
+    ticks(maxV, 4).forEach(v => {
+      el("line", { x1: m.l, x2: m.l + iw, y1: yv(v), y2: yv(v), class: v === 0 ? "base" : "grid" }, svg);
+      el("text", { x: m.l - 8, y: yv(v) + 4, "text-anchor": "end" }, svg, opts.fmtAxis(v));
+    });
+    for (let i = 0; i < N; i++) {
+      const isLast = i === N - 1;
+      if (!(Y[i] % 10 === 0 || isLast)) continue;
+      if (!isLast && x(N - 1) - x(i) < 44) continue;  // keep clear of the final year's label
+      el("text", { x: x(i), y: H - 6, "text-anchor": isLast ? "end" : "middle" }, svg, Y[i]);
+    }
+    (opts.refs || []).forEach(r => {
+      el("line", { x1: m.l, x2: m.l + iw, y1: yv(r.value), y2: yv(r.value), class: "ref" }, svg);
+      el("text", { x: m.l + 4, y: yv(r.value) - 5, class: "ref-label" }, svg, r.label);
+    });
+    const ends = [];
+    opts.series.forEach(s => {
+      const d = s.values.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + yv(v).toFixed(1)).join(" ");
+      el("path", { d, fill: "none", stroke: s.color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round", class: "series" }, svg);
+      el("circle", { cx: x(N - 1), cy: yv(s.values[N - 1]), r: 4, fill: s.color, stroke: cssVar("--surface"), "stroke-width": 2 }, svg);
+      ends.push({ y: yv(s.values[N - 1]), text: opts.fmtEnd(s.values[N - 1]) });
+    });
+    ends.sort((a, b) => a.y - b.y);
+    for (let k = 1; k < ends.length; k++) if (ends[k].y - ends[k - 1].y < 13) ends[k].y = ends[k - 1].y + 13;
+    ends.forEach(e => el("text", { x: m.l + iw + 8, y: e.y + 4, class: "end-label" }, svg, e.text));
+    // crosshair
+    const cross = el("line", { y1: m.t, y2: m.t + ih, class: "cross", visibility: "hidden" }, svg);
+    const hit = el("rect", { x: m.l, y: m.t, width: iw, height: ih, fill: "transparent", tabindex: 0 }, svg);
+    const tip = tooltip(card);
+    function show(i) {
+      cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
+      fillTip(tip, String(Y[i]), opts.series.map(s => ({ color: s.color, value: opts.fmtTip(s.values[i]), label: s.label })));
+      placeTip(card, tip, svg, x(i) * svg.getBoundingClientRect().width / W, m.t + 10);
+    }
+    function idxFromEvent(ev) {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+      return Math.max(0, Math.min(N - 1, Math.round((px - m.l) / iw * (N - 1))));
+    }
+    let focusIdx = N - 1;
+    hit.addEventListener("pointermove", ev => { focusIdx = idxFromEvent(ev); show(focusIdx); });
+    hit.addEventListener("pointerleave", () => { cross.setAttribute("visibility", "hidden"); tip.hidden = true; });
+    hit.addEventListener("focus", () => show(focusIdx));
+    hit.addEventListener("blur", () => { cross.setAttribute("visibility", "hidden"); tip.hidden = true; });
+    hit.addEventListener("keydown", ev => {
+      if (ev.key === "ArrowLeft") { focusIdx = Math.max(0, focusIdx - 1); show(focusIdx); ev.preventDefault(); }
+      if (ev.key === "ArrowRight") { focusIdx = Math.min(N - 1, focusIdx + 1); show(focusIdx); ev.preventDefault(); }
+    });
+  }
+
+  // ------------------------------------------------------- stacked bars
+  function stackChart(rows) {
+    const svg = document.getElementById("ch-mix"), card = svg.closest(".card");
+    const W = svg.clientWidth || 900, H = 320, m = { l: 52, r: 12, t: 22, b: 26 };
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.textContent = "";
+    let pick = rows.filter(r => r.year % 5 === 0 || r.year === LATEST);
+    if ((W - m.l - m.r) / pick.length < 48) pick = rows.filter(r => r.year % 10 === 0 || r.year === LATEST);
+    const colors = SERIES(), iw = W - m.l - m.r, ih = H - m.t - m.b;
+    const totals = pick.map(r => CATS.reduce((a, c) => a + r.vals[c], 0));
+    const maxV = niceMax(Math.max(...totals) * 1.08);
+    const yv = v => m.t + ih - (v / maxV) * ih;
+    ticks(maxV, 4).forEach(v => {
+      el("line", { x1: m.l, x2: m.l + iw, y1: yv(v), y2: yv(v), class: v === 0 ? "base" : "grid" }, svg);
+      el("text", { x: m.l - 8, y: yv(v) + 4, "text-anchor": "end" }, svg, money(v));
+    });
+    const band = iw / pick.length, bw = Math.min(24 * 1.6, band * 0.62);
+    const tip = tooltip(card);
+    pick.forEach((r, j) => {
+      const cx = m.l + band * (j + 0.5);
+      let acc = 0;
+      const g = el("g", { tabindex: 0, role: "img", "aria-label": `${r.year}: ${money(totals[j])}` }, svg);
+      CATS.forEach((c, k) => {
+        const v = r.vals[c]; if (v <= 0) return;
+        const y0 = yv(acc), y1 = yv(acc + v);
+        el("rect", { x: cx - bw / 2, y: y1 + 1, width: bw, height: Math.max(0, y0 - y1 - 2), fill: colors[k], rx: k === CATS.length - 1 ? 3 : 0 }, g);
+        acc += v;
+      });
+      el("rect", { x: cx - band / 2, y: m.t, width: band, height: ih, fill: "transparent" }, g);
+      if (band >= 40) el("text", { x: cx, y: yv(totals[j]) - 6, "text-anchor": "middle", class: "end-label" }, svg, money(totals[j]));
+      el("text", { x: cx, y: H - 6, "text-anchor": "middle" }, svg, r.year);
+      const show = () => {
+        fillTip(tip, `${r.year} · ${money(totals[j])}`, CATS.slice().reverse().map(c => ({
+          color: colors[CATS.indexOf(c)], box: true, value: money(r.vals[c]) + " · " + pct(r.vals[c] / totals[j]), label: c })));
+        placeTip(card, tip, svg, cx * svg.getBoundingClientRect().width / W, m.t);
+      };
+      g.addEventListener("pointermove", show); g.addEventListener("focus", show);
+      g.addEventListener("pointerleave", () => tip.hidden = true); g.addEventListener("blur", () => tip.hidden = true);
+    });
+  }
+
+  // ------------------------------------------------------------ render
+  function render() {
+    const rows = compute(S.scen), other = compute(S.scen === "A" ? "B" : "A");
+    const A = S.scen === "A" ? rows : other, B = S.scen === "A" ? other : rows;
+    const P = D.per_year, colors = SERIES();
+    const real = S.dollars === "real";
+    const dl = real ? `${LATEST} dollars` : "dollars of each year";
+    const yard = YARD[S.yard] || YARD.married_couple, yinc = P[yard.col];
+    const share = (r, i) => r.cost / yinc[i];
+    const first = rows[0], last = rows[N - 1];
+
+    const lede = document.getElementById("lede");
+    lede.textContent = "";
+    const parts = [
+      ["In " + LATEST + ", a house, two cars, " + (S.scen === "A" ? "childcare, " : "") + "vacations and retirement at " + S.retire + " took ", false],
+      [moneyFull(last.cost) + " a year in pre-tax income", true],
+      [". That is " + pct(share(last, N - 1)) + " of what " + yard.who + " earned, or ", false],
+      [last.earners.toFixed(1) + " full-time median paychecks", true],
+      [". In " + FIRST + " it took " + first.earners.toFixed(1) + ".", false],
+    ];
+    parts.forEach(([t, strong]) => { const n = strong ? document.createElement("strong") : document.createTextNode(t); if (strong) n.textContent = t; lede.appendChild(n); });
+    if (S.scen === "B") lede.appendChild(document.createTextNode(" This is the one-earner household, with a parent at home instead of paid childcare."));
+
+    const figs = document.getElementById("figures"); figs.textContent = "";
+    [
+      [moneyFull(last.cost / deflate(N - 1)), `Pre-tax cost, ${LATEST}`],
+      [moneyFull(first.cost / deflate(0)), `Pre-tax cost, ${FIRST}` + (real ? ` (in ${LATEST} $)` : "")],
+      [pct(share(first, 0)) + " → " + pct(share(last, N - 1)), `Share of ${yard.label} income`],
+      [first.earners.toFixed(2) + " → " + last.earners.toFixed(2), "Median full-time paychecks needed"],
+    ].forEach(([v, l]) => {
+      const d = document.createElement("div"); d.className = "fig";
+      const a = document.createElement("div"); a.className = "v"; a.textContent = v;
+      const b = document.createElement("div"); b.className = "l"; b.textContent = l;
+      d.appendChild(a); d.appendChild(b); figs.appendChild(d);
+    });
+
+    document.getElementById("sub-cost").textContent = `Pre-tax income needed for the lifestyle vs. median incomes, ${dl}.`;
+    const costSeries = [
+      { label: "Cost: two earners, paid childcare", color: colors[0], values: A.map((r, i) => r.cost / deflate(i)) },
+      { label: "Cost: one earner, parent at home", color: colors[1], values: B.map((r, i) => r.cost / deflate(i)) },
+      { label: "Median married-couple income", color: colors[2], values: P.median_married_couple.map((v, i) => v / deflate(i)) },
+      { label: "Median household income", color: colors[3], values: P.median_household.map((v, i) => v / deflate(i)) },
+    ];
+    legend("leg-cost", costSeries, "line");
+    lineChart({ id: "ch-cost", series: costSeries, height: 320, fmtAxis: money, fmtEnd: money, fmtTip: moneyFull });
+
+    const sh = [
+      { label: "Two earners, paid childcare", color: colors[0], values: A.map((r, i) => share(r, i) * 100) },
+      { label: "One earner, parent at home", color: colors[1], values: B.map((r, i) => share(r, i) * 100) },
+    ];
+    document.getElementById("share-title").textContent = `Share of ${yard.label} income`;
+    document.getElementById("share-sub").textContent = `Pre-tax cost ÷ ${yard.who}'s income (${yard.src}). Above 100%, they can't afford it.`;
+    legend("leg-share", sh, "line");
+    lineChart({ id: "ch-share", series: sh, fmtAxis: v => v + "%", fmtEnd: v => Math.round(v) + "%", fmtTip: v => Math.round(v) + "%", refs: [{ value: 100, label: "100% of income" }] });
+
+    const er = [
+      { label: "Two earners, paid childcare", color: colors[0], values: A.map(r => r.earners) },
+      { label: "One earner, parent at home", color: colors[1], values: B.map(r => r.earners) },
+    ];
+    legend("leg-earners", er, "line");
+    lineChart({ id: "ch-earners", series: er, fmtAxis: v => v.toFixed(1), fmtEnd: v => v.toFixed(1), fmtTip: v => v.toFixed(2) + " paychecks", refs: [{ value: 2, label: "2 full-time earners" }] });
+
+    document.getElementById("sub-mix").textContent = `Pre-tax cost by category (${S.scen === "A" ? "two earners, paid childcare" : "one earner, parent at home"}), ${dl}. "Everything else" is household goods, technology, vacations, clothing, personal care and entertainment.`;
+    legend("leg-mix", CATS.map((c, k) => ({ label: c, color: colors[k] })), "box");
+    stackChart(rows.map((r, i) => ({ year: r.year, vals: Object.fromEntries(CATS.map(c => [c, (r.cat[c] || 0) / deflate(i)])) })));
+
+    const tbl = document.getElementById("tbl"); tbl.textContent = "";
+    const head = ["Year", "Cost (2 earners)", "Cost (1 earner)", "Married-couple income", "Household income", `Share of ${yard.label} (2 earners)`, "(1 earner)", "Paychecks (2 earners)", "Paychecks (1 earner)"];
+    const thead = tbl.createTHead().insertRow(); head.forEach(h => { const th = document.createElement("th"); th.textContent = h; thead.appendChild(th); });
+    const tb = tbl.createTBody();
+    for (let i = 0; i < N; i++) {
+      const tr = tb.insertRow();
+      [Y[i], moneyFull(A[i].cost / deflate(i)), moneyFull(B[i].cost / deflate(i)), moneyFull(P.median_married_couple[i] / deflate(i)),
+       moneyFull(P.median_household[i] / deflate(i)), pct(share(A[i], i)), pct(share(B[i], i)), A[i].earners.toFixed(2), B[i].earners.toFixed(2)]
+        .forEach(v => { tr.insertCell().textContent = v; });
+    }
+    try { localStorage.setItem("adi-state", JSON.stringify(S)); } catch (e) {}
+  }
+
+  // ---------------------------------------------------------- controls
+  const sliders = [
+    ["in-retire", "retire", v => v.toFixed(1).replace(".0", "")],
+    ["in-return", "ret", v => (v * 100).toFixed(2).replace(/0$/, "") + "%"],
+    ["in-home", "home", v => Math.round(v * 100) + "%"],
+    ["in-down", "down", v => Math.round(v * 100) + "%"],
+    ["in-care", "care", v => Math.round(v * 100) + "%"],
+  ];
+  function syncControls() {
+    sliders.forEach(([id, key, f]) => { const inp = document.getElementById(id); inp.value = S[key]; document.getElementById(id.replace("in-", "out-")).textContent = f(+S[key]); });
+    document.querySelectorAll("[data-scen]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.scen === S.scen)));
+    document.querySelectorAll("[data-dollars]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.dollars === S.dollars)));
+    document.getElementById("in-yard").value = S.yard;
+  }
+  let raf = 0;
+  const schedule = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(render); };
+  sliders.forEach(([id, key, f]) => document.getElementById(id).addEventListener("input", ev => {
+    S[key] = +ev.target.value; document.getElementById(id.replace("in-", "out-")).textContent = f(S[key]); schedule();
+  }));
+  document.querySelectorAll("[data-scen]").forEach(b => b.addEventListener("click", () => { S.scen = b.dataset.scen; syncControls(); schedule(); }));
+  document.querySelectorAll("[data-dollars]").forEach(b => b.addEventListener("click", () => { S.dollars = b.dataset.dollars; syncControls(); schedule(); }));
+  document.getElementById("in-yard").addEventListener("change", ev => { S.yard = ev.target.value; schedule(); });
+  document.getElementById("reset").addEventListener("click", () => { S = Object.assign({}, DEFAULTS); syncControls(); schedule(); });
+  window.addEventListener("resize", schedule);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", schedule);
+  new MutationObserver(schedule).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  syncControls(); render();
+  window.__adiCompute = compute;
+})();
+</script>

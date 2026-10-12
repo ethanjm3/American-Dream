@@ -1,0 +1,189 @@
+# American Dream Index -- model assumptions.
+#
+# Every dollar "anchor" is a national-average price for the anchor year,
+# taken from the source named beside it. Other years are derived by moving
+# the anchor along the price index named in adi/components.py, unless the
+# component has its own historical series (house prices, mortgage rates,
+# KFF premiums). See docs/methodology.md for the full rationale.
+
+[model]
+start_year = 1980
+end_year = 2025
+anchor_year = 2024
+
+[household]
+# Scenario A: two earners, two children in paid full-time care.
+# Scenario B: one earner, one parent provides care at home.
+children = 2
+child_ages = [2, 4]
+primary_earner_share = 0.55   # Scenario A wage split, primary / secondary earner
+parent_age = 35
+
+# ------------------------------------------------------------------ housing
+[housing]
+# Typical existing home (the median existing home is ~3 bed / 2 bath).
+# NAR 2024 annual median existing-home sales price.
+anchor_price = 407500
+price_index = "FHFA_ALL_TRANSACTIONS"   # constant-quality repeat-sales index
+down_payment = 0.20
+down_payment_save_years = 10            # years spent saving the down payment
+mortgage_term_years = 30
+interest_averaging_years = 10           # years of interest used for the tax deduction
+# Effective rate on market value: ACIR (1980-87), Census 2000, ACS (2023-24),
+# interpolated. A number here applies one rate to every year.
+property_tax_rate = "reference:property_tax_rate"
+maintenance_rate = 0.010                # 1% of value per year rule of thumb
+# Homeowners insurance: NAIC average HO-3 premium (2008-2023), extended on
+# the CPI for tenants' and household insurance. A number here is used as the
+# anchor-year premium instead.
+insurance_anchor = "reference:home_insurance"
+# Electricity, gas, fuel oil, water and trash: CE married couples with
+# children, "utilities, fuels and public services" less telephone services.
+utilities_anchor = "ce:UTILS-PHONE"
+
+# ------------------------------------------------------------ transportation
+[transportation]
+cars = 2
+miles_per_car = 15000
+# AAA "Your Driving Costs" 2024, new vehicle, 15k mi/yr, per car. The
+# components move with their CPIs, then are scaled each year so they sum to
+# AAA's published total for that year (BTS NTS Table 3-17). Remove
+# total_per_car to use the CPI components alone.
+total_per_car = "reference:aaa_driving_costs"
+depreciation_anchor = 4680
+finance_anchor = 1332
+fuel_anchor = 2235
+insurance_anchor = 1715
+maintenance_anchor = 1520
+fees_anchor = 815
+
+# ---------------------------------------------------------------- childcare
+[childcare]
+# Child Care Aware of America, national average price of full-time centre
+# care. CCAoA publishes per-age figures for 2025 (mean of its three methods:
+# infant $15,460, 4-year-old $12,397); these are carried to 2024 with its
+# published national averages ($13,128 / $13,184).
+infant_anchor = 15395
+preschool_anchor = 12345
+# Share of a full year both children are in paid care (1.0 = peak years).
+intensity = 1.0
+
+# --------------------------------------------------------------------- food
+[food]
+# CE married couples with children: food at home and food away from home.
+groceries_anchor = "ce:FOODHOME"
+restaurants_anchor = "ce:FOODAWAY"
+
+# ---------------------------------------------------------- household goods
+[household_goods]
+# Furniture: CE married couples with children, following their actual spending.
+furnishings_anchor = "ce:FURNITUR"
+furnishings_index = "CE_FURNITURE"
+
+# Replacement reserve: price / expected life, per item, anchor-year prices.
+# Quality-adjusted CPIs for TVs and appliances imply absurd past prices (a
+# 2024-quality 60" TV "cost" ~$50,000 in 1980), so these items follow what
+# married couples with children actually spent on the category (BLS CE).
+[household_goods.items]
+# Prices: DOE installed costs for baseline models (2022$, efficiency
+# rulemakings) for the refrigerator (French door), washer and dryer; typical
+# retail prices for the rest. Lives: NAHB.
+television_60in   = { price = 550,  life = 8,  index = "CE_TVAUDIO" }
+refrigerator      = { price = 1461, life = 13, index = "CE_MAJOR_APPLIANCES" }
+freezer           = { price = 450,  life = 11, index = "CE_MAJOR_APPLIANCES" }
+washer            = { price = 690,  life = 10, index = "CE_MAJOR_APPLIANCES" }
+dryer             = { price = 656,  life = 13, index = "CE_MAJOR_APPLIANCES" }
+microwave         = { price = 180,  life = 9,  index = "CE_SMALL_APPLIANCES" }
+range_oven        = { price = 1000, life = 14, index = "CE_MAJOR_APPLIANCES" }
+
+# --------------------------------------------------------------- technology
+[technology]
+smartphones = 2
+smartphone_price = 799            # iPhone 16 base price (Apple, Sept 2024)
+smartphone_life_years = 3
+wireless_per_line_month = 70      # FCC 2024 list prices: $60-$90 for one line
+internet_month = 73               # USTelecom Broadband Pricing Index 2024: $72.58
+cable_month = 105                 # generic cable/satellite package (no authoritative average)
+
+# --------------------------------------------------------------- healthcare
+[healthcare]
+# Worker contribution to employer family coverage comes from KFF history
+# (data/reference/kff_premiums.csv); before the first KFF year it is
+# carried back on the medical care services CPI.
+# Deductibles, copays, drugs and supplies: CE married couples with children,
+# healthcare less health insurance.
+out_of_pocket_anchor = "ce:HEALTH-HLTHINSR"
+
+# ---------------------------------------------------------------- vacations
+[vacations]
+travelers = 4
+domestic_trips_per_year = 1
+domestic_airfare_per_person = 467       # BTS average round-trip domestic fare, 2024
+domestic_nights = 6
+domestic_lodging_per_night = 159        # CoStar US hotel ADR 2024: $158.67
+domestic_daily_food_activities = 200
+international_every_years = 5
+international_airfare_per_person = 900  # US-Europe round trip, summer 2024 (Hopper)
+international_nights = 8
+international_lodging_per_night = 220
+international_daily_food_activities = 300
+
+# --------------------------------------------------------- other necessities
+[other]
+# Anchors are what CE married couples with children spent in the anchor year.
+# Indexes: "CE_*" follows what those families actually spent each year (1988+;
+# constant real spending before), i.e. an era-typical basket. Swap in the
+# item CPI (APPAREL, PERSONAL_CARE, HOUSEHOLD_SUPPLIES, ENTERTAINMENT,
+# CPI_ALL) for a fixed 2024 basket priced in each year -- that version
+# overstates past costs because it prices today's quantities (e.g. of cheap
+# imported clothing) at past relative prices.
+apparel_anchor = "ce:APPAREL"
+apparel_index = "CE_APPAREL"
+personal_care_anchor = "ce:PERSCARE"
+personal_care_index = "CE_PERSONAL_CARE"
+household_supplies_anchor = "ce:HKPGSUPP"
+household_supplies_index = "CE_HOUSEKEEPING"
+# Entertainment less audio/visual equipment & services (counted in Technology).
+entertainment_anchor = "ce:ENTRTAIN-TVAUDIO"
+entertainment_index = "CE_ENTERTAINMENT"
+miscellaneous_anchor = "ce:MISC"
+miscellaneous_index = "CE_MISC"
+
+# --------------------------------------------------------------- retirement
+[retirement]
+retire_age = 57.5            # midpoint of the 55-60 goal
+start_saving_age = 30
+ss_claim_age = 62
+# Social Security PIA for a medium (career-average) earner as a share of
+# wage-indexed career earnings. Wage-indexed bend points have held this near
+# 41-42% since the 1977 amendments; claiming early reduces it further.
+ss_pia_replacement = 0.41
+longevity_buffer_years = 3   # plan past the longer-lived spouse's life expectancy
+real_return_accumulation = 0.045
+real_return_retirement = 0.030
+# Retired couple's spending relative to the working family's (excludes the
+# mortgage, childcare, and the children's share of food etc.).
+couple_share_food = 0.55
+couple_share_goods = 0.75
+db_pension_replacement = 0.25   # pension as share of earnings for a covered worker
+# Set real_return_accumulation = "market" to use each year's real 10-year
+# Treasury yield plus a stock premium instead of fixed returns.
+market_equity_premium = 0.04
+market_stock_share_saving = 0.6
+market_stock_share_retired = 0.3
+# Social Security: 1.0 = scheduled benefits. The 2025 Trustees project the
+# retirement trust fund to run out in 2033, after which ~77% is payable.
+ss_payable_share = 1.0
+ss_depletion_year = 2033
+# Retiree health insurance before Medicare: share of the total (employer +
+# worker) family premium a couple pays on the individual market.
+pre_medicare_premium_share = 0.85
+# Medicare Part B + Medigap + Part D, per person, anchor year.
+medicare_costs_per_person_anchor = 4800
+
+# ------------------------------------------------------------------ taxes
+[taxes]
+include_state = true
+# TAXSIM 35 supports tax law through 2023. Later years apply 2023 law to
+# CPI-deflated amounts (brackets and deductions are inflation indexed).
+last_taxsim_year = 2023
