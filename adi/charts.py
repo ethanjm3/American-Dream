@@ -8,6 +8,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from matplotlib.ticker import FuncFormatter  # noqa: E402
 
@@ -50,8 +51,8 @@ def _end_label(ax, x, y, text, dy: float = 0.0) -> None:
                 va="center", fontsize=9, color=INK_2)
 
 
-def _source(fig) -> None:
-    fig.text(0.01, -0.06, "Sources: FHFA, Freddie Mac, BLS CPI & CE, Census CPS, KFF, AAA, "
+def _source(fig, y: float = -0.06) -> None:
+    fig.text(0.01, y, "Sources: FHFA, Freddie Mac, BLS CPI & CE, Census CPS, KFF, AAA, "
              "Child Care Aware, NBER TAXSIM. See docs/methodology.md.",
              fontsize=7.5, color=MUTED)
 
@@ -192,3 +193,61 @@ def render_all(results: dict[str, pd.DataFrame]) -> list[Path]:
     paths += breakdown(summary, cpi, base_year, "A")
     paths += breakdown(summary, cpi, base_year, "B")
     return paths
+
+
+# ----------------------------------------------------------- disconnect charts
+
+def yardsticks(summary: pd.DataFrame, inc: pd.DataFrame) -> list[Path]:
+    """Cost relative to four income yardsticks, indexed to 1980 = 100."""
+    a = summary[summary.scenario == "A"].set_index("year")["cost_pretax"]
+    lines = [
+        ("median_ft_earnings", "One full-time paycheck"),
+        ("median_household", "Median household"),
+        ("median_married_couple", "Median married couple"),
+        ("median_married_with_children", "Median married couple with children"),
+    ]
+    fig, ax = plt.subplots(figsize=(9, 5.2))
+    for i, (col, label) in enumerate(lines):
+        r = a / inc[col].reindex(a.index)
+        r = 100 * r / r.iloc[0]
+        ax.plot(r.index, r, color=SERIES[i], linewidth=2, label=label)
+        ax.plot(r.index[-1], r.iloc[-1], "o", color=SERIES[i], markersize=6,
+                markeredgecolor=SURFACE, markeredgewidth=2)
+        _end_label(ax, r.index[-1], r.iloc[-1], f"{r.iloc[-1]:.0f}")
+    ax.axhline(100, color=INK_2, linewidth=1)
+    ax.set_ylim(55, 110)
+    ax.set_xlim(a.index.min(), a.index.max() + 4)
+    _legend_below(ax, 2)
+    _style(ax, "Whether it got cheaper depends on whose income you measure against",
+           "Pre-tax cost of the lifestyle (two earners, paid childcare) ÷ each income, 1980 = 100")
+    _source(fig, -0.12)
+    return _save(fig, "05_yardsticks")
+
+
+def paycheck_changes(cat: pd.DataFrame) -> list[Path]:
+    """Change in each category's cost, in median full-time paychecks."""
+    df = cat.drop(index="Total")[["change_1980_2025", "change_2019_2025"]]
+    df = df.sort_values("change_1980_2025")
+    fig, ax = plt.subplots(figsize=(9, 5.6))
+    y = np.arange(len(df))
+    h = 0.36
+    ax.barh(y + h / 2, df["change_1980_2025"], h, color=SERIES[0], label="1980 → 2025")
+    ax.barh(y - h / 2, df["change_2019_2025"], h, color=SERIES[1], label="2019 → 2025")
+    for yi, v in zip(y, df["change_1980_2025"]):
+        ax.annotate(f"{v:+.2f}", (v, yi + h / 2), xytext=(4 if v >= 0 else -4, 0), textcoords="offset points",
+                    ha="left" if v >= 0 else "right", va="center", fontsize=8.5, color=INK_2)
+    ax.set_yticks(y, df.index)
+    lo, hi = df.min().min(), df.max().max()
+    ax.set_xlim(lo * 1.22, hi * 1.15)
+    ax.axvline(0, color=AXIS, linewidth=1)
+    ax.grid(axis="x", color=GRID, linewidth=0.8)
+    ax.grid(axis="y", visible=False)
+    ax.tick_params(axis="y", labelsize=9.5, labelcolor=INK_2)
+    _legend_below(ax, 2)
+    tot = cat.loc["Total"]
+    _style(ax, "What got dearer and what got cheaper, in paychecks",
+           f"Change in each category's cost, in median full-time paychecks (total {tot['change_1980_2025']:+.2f} "
+           f"since 1980, {tot['change_2019_2025']:+.2f} since 2019)")
+    ax.grid(axis="y", visible=False)
+    _source(fig)
+    return _save(fig, "06_paycheck_changes")

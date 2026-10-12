@@ -62,6 +62,7 @@ header { display: grid; gap: 14px; }
 .controls-row { display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: end; }
 .seg { display: grid; gap: 6px; }
 .seg-label, .slider label { font-size: var(--step--1); font-weight: 600; color: var(--ink-2); }
+select.yard { font: inherit; font-size: var(--step--1); padding: 7px 10px; border: 1px solid var(--axis); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: 100%; }
 .seg-buttons { display: inline-flex; border: 1px solid var(--axis); border-radius: 8px; overflow: hidden; }
 .seg-buttons button { font: inherit; font-size: var(--step--1); padding: 7px 12px; border: 0; background: transparent; color: var(--ink-2); cursor: pointer; }
 .seg-buttons button + button { border-left: 1px solid var(--axis); }
@@ -141,6 +142,15 @@ footer { font-size: var(--step--1); color: var(--muted); border-top: 1px solid v
           <button type="button" id="dol-nominal" data-dollars="nominal" aria-pressed="false">Dollars of the day</button>
         </div>
       </div>
+      <div class="seg">
+        <label class="seg-label" for="in-yard">Compare with the income of</label>
+        <select id="in-yard" class="yard">
+          <option value="married_couple">Median married couple</option>
+          <option value="married_with_children">Median married couple with children</option>
+          <option value="household">Median household</option>
+          <option value="head_25_34">Median family headed by a 25–34-year-old</option>
+        </select>
+      </div>
     </div>
     <div class="sliders">
       <div class="slider">
@@ -180,8 +190,8 @@ footer { font-size: var(--step--1); color: var(--muted); border-top: 1px solid v
       <svg class="chart" id="ch-cost" role="img" aria-labelledby="card-cost-title"></svg>
     </figure>
     <figure class="card" id="card-share" style="margin:0">
-      <h2>Share of median married-couple income</h2>
-      <div class="sub">Pre-tax cost ÷ Census median married-couple family income. Above 100%, the median couple can't afford it.</div>
+      <h2 id="share-title">Share of median married-couple income</h2>
+      <div class="sub" id="share-sub"></div>
       <div class="legend" id="leg-share"></div>
       <svg class="chart" id="ch-share" role="img" aria-label="Share of income chart"></svg>
     </figure>
@@ -210,6 +220,7 @@ footer { font-size: var(--step--1); color: var(--muted); border-top: 1px solid v
       <div><h3>The lifestyle</h3><p>A typical existing home (the median home is about 3 bed / 2 bath) bought with a 30-year mortgage, two new cars driven 15,000 miles a year, two children in full-time centre care, groceries and meals out, a 60" TV and a full set of kitchen and laundry appliances, two smartphones, home internet and cable, employer health coverage, a domestic family trip every year and an international one every five years, and saving enough to retire at 55–60.</p></div>
       <div><h3>How costs are dated</h3><p>House prices follow the FHFA repeat-sales index and Freddie Mac mortgage rates. Health premiums are KFF's employer survey. Other items start from a 2024 national average (AAA, Child Care Aware, BLS Consumer Expenditure Survey) and move with the matching CPI. Phones, TVs, appliances, clothing and entertainment follow what married couples with children actually spent each year, because quality-adjusted prices for electronics imply a 2024 TV would have cost $50,000 in 1980.</p></div>
       <div><h3>Taxes and retirement</h3><p>The family pays federal and state income tax and FICA, computed with NBER TAXSIM for every state and weighted by population; mortgage interest and property tax are itemized when that beats the standard deduction. Retirement saving funds spending from the retirement age through the longer-lived spouse's life expectancy plus three years, net of Social Security claimed at 62 and expected pension income, including private health insurance until Medicare.</p></div>
+      <div><h3>Cheaper for whom?</h3><p>Measured in one worker's paychecks, the lifestyle cost about the same in 2025 (3.5) as in the mid-1980s (3.4–3.6). It looks cheaper against married couples' income because couples now bring in 2.1 paychecks instead of 1.7, and because married parents are a smaller, better-off group (17% of households, down from 31%). Childcare, health insurance and retirement take more paychecks; cars, clothes, food and taxes take fewer. Since 2019 the cost per paycheck is up 6%, all of it housing.</p></div>
       <div><h3>Income benchmarks</h3><p>Census CPS median household and married-couple family income (current dollars), and BLS median usual weekly earnings of full-time workers × 52. The interactive version recomputes housing, childcare and retirement in your browser and re-solves taxes on each year's TAXSIM schedule, holding itemized deductions at baseline.</p></div>
     </div>
   </section>
@@ -229,7 +240,13 @@ const ADI = /*__ADI_DATA__*/null;
   const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const SERIES = () => [1,2,3,4,5,6,7,8].map(i => cssVar("--s" + i));
 
-  const DEFAULTS = { scen: "A", dollars: "real", retire: A0.retire_age, ret: A0.real_return_accumulation, home: 1, down: A0.down_payment, care: 1 };
+  const YARD = {
+    married_couple: { col: "median_married_couple", label: "median married-couple", who: "the median married couple", src: "Census F-7" },
+    married_with_children: { col: "median_married_with_children", label: "median married-with-children", who: "the median married couple with children", src: "Census F-10" },
+    household: { col: "median_household", label: "median household", who: "the median household", src: "Census H-5" },
+    head_25_34: { col: "median_family_head_25_34", label: "median young-family", who: "the median family headed by a 25–34-year-old", src: "Census F-11" },
+  };
+  const DEFAULTS = { scen: "A", dollars: "real", yard: "married_couple", retire: A0.retire_age, ret: A0.real_return_accumulation, home: 1, down: A0.down_payment, care: 1 };
   let S = Object.assign({}, DEFAULTS);
   try { const saved = JSON.parse(localStorage.getItem("adi-state") || "null"); if (saved) S = Object.assign(S, saved); } catch (e) {}
 
@@ -460,6 +477,8 @@ const ADI = /*__ADI_DATA__*/null;
     const P = D.per_year, colors = SERIES();
     const real = S.dollars === "real";
     const dl = real ? `${LATEST} dollars` : "dollars of each year";
+    const yard = YARD[S.yard] || YARD.married_couple, yinc = P[yard.col];
+    const share = (r, i) => r.cost / yinc[i];
     const first = rows[0], last = rows[N - 1];
 
     const lede = document.getElementById("lede");
@@ -467,7 +486,7 @@ const ADI = /*__ADI_DATA__*/null;
     const parts = [
       ["In " + LATEST + ", a house, two cars, " + (S.scen === "A" ? "childcare, " : "") + "vacations and retirement at " + S.retire + " took ", false],
       [moneyFull(last.cost) + " a year in pre-tax income", true],
-      [". That is " + pct(last.pctMarried) + " of what the median married couple earned, or ", false],
+      [". That is " + pct(share(last, N - 1)) + " of what " + yard.who + " earned, or ", false],
       [last.earners.toFixed(1) + " full-time median paychecks", true],
       [". In " + FIRST + " it took " + first.earners.toFixed(1) + ".", false],
     ];
@@ -478,7 +497,7 @@ const ADI = /*__ADI_DATA__*/null;
     [
       [moneyFull(last.cost / deflate(N - 1)), `Pre-tax cost, ${LATEST}`],
       [moneyFull(first.cost / deflate(0)), `Pre-tax cost, ${FIRST}` + (real ? ` (in ${LATEST} $)` : "")],
-      [pct(first.pctMarried) + " → " + pct(last.pctMarried), "Share of median married-couple income"],
+      [pct(share(first, 0)) + " → " + pct(share(last, N - 1)), `Share of ${yard.label} income`],
       [first.earners.toFixed(2) + " → " + last.earners.toFixed(2), "Median full-time paychecks needed"],
     ].forEach(([v, l]) => {
       const d = document.createElement("div"); d.className = "fig";
@@ -498,9 +517,11 @@ const ADI = /*__ADI_DATA__*/null;
     lineChart({ id: "ch-cost", series: costSeries, height: 320, fmtAxis: money, fmtEnd: money, fmtTip: moneyFull });
 
     const sh = [
-      { label: "Two earners, paid childcare", color: colors[0], values: A.map(r => r.pctMarried * 100) },
-      { label: "One earner, parent at home", color: colors[1], values: B.map(r => r.pctMarried * 100) },
+      { label: "Two earners, paid childcare", color: colors[0], values: A.map((r, i) => share(r, i) * 100) },
+      { label: "One earner, parent at home", color: colors[1], values: B.map((r, i) => share(r, i) * 100) },
     ];
+    document.getElementById("share-title").textContent = `Share of ${yard.label} income`;
+    document.getElementById("share-sub").textContent = `Pre-tax cost ÷ ${yard.who}'s income (${yard.src}). Above 100%, they can't afford it.`;
     legend("leg-share", sh, "line");
     lineChart({ id: "ch-share", series: sh, fmtAxis: v => v + "%", fmtEnd: v => Math.round(v) + "%", fmtTip: v => Math.round(v) + "%", refs: [{ value: 100, label: "100% of income" }] });
 
@@ -516,13 +537,13 @@ const ADI = /*__ADI_DATA__*/null;
     stackChart(rows.map((r, i) => ({ year: r.year, vals: Object.fromEntries(CATS.map(c => [c, (r.cat[c] || 0) / deflate(i)])) })));
 
     const tbl = document.getElementById("tbl"); tbl.textContent = "";
-    const head = ["Year", "Cost (2 earners)", "Cost (1 earner)", "Married-couple income", "Household income", "Share (2 earners)", "Share (1 earner)", "Paychecks (2 earners)", "Paychecks (1 earner)"];
+    const head = ["Year", "Cost (2 earners)", "Cost (1 earner)", "Married-couple income", "Household income", `Share of ${yard.label} (2 earners)`, "(1 earner)", "Paychecks (2 earners)", "Paychecks (1 earner)"];
     const thead = tbl.createTHead().insertRow(); head.forEach(h => { const th = document.createElement("th"); th.textContent = h; thead.appendChild(th); });
     const tb = tbl.createTBody();
     for (let i = 0; i < N; i++) {
       const tr = tb.insertRow();
       [Y[i], moneyFull(A[i].cost / deflate(i)), moneyFull(B[i].cost / deflate(i)), moneyFull(P.median_married_couple[i] / deflate(i)),
-       moneyFull(P.median_household[i] / deflate(i)), pct(A[i].pctMarried), pct(B[i].pctMarried), A[i].earners.toFixed(2), B[i].earners.toFixed(2)]
+       moneyFull(P.median_household[i] / deflate(i)), pct(share(A[i], i)), pct(share(B[i], i)), A[i].earners.toFixed(2), B[i].earners.toFixed(2)]
         .forEach(v => { tr.insertCell().textContent = v; });
     }
     try { localStorage.setItem("adi-state", JSON.stringify(S)); } catch (e) {}
@@ -540,6 +561,7 @@ const ADI = /*__ADI_DATA__*/null;
     sliders.forEach(([id, key, f]) => { const inp = document.getElementById(id); inp.value = S[key]; document.getElementById(id.replace("in-", "out-")).textContent = f(+S[key]); });
     document.querySelectorAll("[data-scen]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.scen === S.scen)));
     document.querySelectorAll("[data-dollars]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.dollars === S.dollars)));
+    document.getElementById("in-yard").value = S.yard;
   }
   let raf = 0;
   const schedule = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(render); };
@@ -548,6 +570,7 @@ const ADI = /*__ADI_DATA__*/null;
   }));
   document.querySelectorAll("[data-scen]").forEach(b => b.addEventListener("click", () => { S.scen = b.dataset.scen; syncControls(); schedule(); }));
   document.querySelectorAll("[data-dollars]").forEach(b => b.addEventListener("click", () => { S.dollars = b.dataset.dollars; syncControls(); schedule(); }));
+  document.getElementById("in-yard").addEventListener("change", ev => { S.yard = ev.target.value; schedule(); });
   document.getElementById("reset").addEventListener("click", () => { S = Object.assign({}, DEFAULTS); syncControls(); schedule(); });
   window.addEventListener("resize", schedule);
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", schedule);

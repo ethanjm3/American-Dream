@@ -144,6 +144,10 @@ def ce(item: str) -> pd.Series:
     return sources.ce_annual(item)
 
 
+# Series used only by the sensitivity analysis (adi/disconnect.py).
+EXTRA_FRED = ["GS10", "EXPINF10YR"]
+
+
 def fetch_all(refresh: bool = False) -> None:
     """Download every raw input the model needs."""
     sources.fetch_bls_cpi(_all_bls_ids(), refresh=refresh)
@@ -151,10 +155,13 @@ def fetch_all(refresh: bool = False) -> None:
     fred_ids = {c[5:] for spec in PRICE_INDEXES.values() for c in spec.chain if c.startswith("fred:")}
     fred_ids |= set(FRED_SERIES.values())
     fred_ids |= {f"{st}POP" for st in STATES}
+    fred_ids |= set(EXTRA_FRED)
     for sid in sorted(fred_ids):
         sources.fetch_fred(sid, refresh=refresh)
     for table in sources.CENSUS_TABLES:
         sources.fetch_census(table, refresh=refresh)
+    for table in sources.CENSUS_FAMILY_TABLES:
+        sources.fetch_census_families(table, refresh=refresh)
 
 
 def _raw_series(code: str) -> pd.Series:
@@ -202,20 +209,24 @@ def fred(name: str) -> pd.Series:
 
 # ---------------------------------------------------------------- income
 
-def _census_median(table: str, section: str) -> pd.Series:
+def _census_median(table: str, *sections: str) -> pd.Series:
     """Median income in current dollars from a Census historical income table.
 
+    ``sections`` is the path of row headings to the block wanted, e.g.
+    ("Married-Couple Families", "One or More Children Under 18 Years Old").
     Years with two rows (2013, 2017 methodology breaks) keep the first row
     listed, which is the estimate on the newer, consistent methodology.
     """
     x = pd.read_excel(sources.fetch_census(table), header=None)
-    labels = x[0].fillna("").astype(str).str.strip()
-    starts = labels[labels.str.startswith(section)].index
-    if len(starts) == 0:
-        raise KeyError(f"section {section!r} not found in {table}")
-    start = starts[0] + 1
+    labels = x[0].fillna("").astype(str).str.strip().str.lstrip(".")
+    pos = 0
+    for section in sections:
+        hits = [i for i in labels[labels.str.startswith(section)].index if i >= pos]
+        if not hits:
+            raise KeyError(f"section {section!r} not found in {table}")
+        pos = hits[0] + 1
     rows = {}
-    for i in range(start, len(x)):
+    for i in range(pos, len(x)):
         lab = labels[i]
         year = lab[:4]
         if not year.isdigit():
@@ -225,7 +236,7 @@ def _census_median(table: str, section: str) -> pd.Series:
         year = int(year)
         if year not in rows:
             rows[year] = float(x.iloc[i, 2])
-    return pd.Series(rows, name=section).sort_index()
+    return pd.Series(rows, name=sections[-1]).sort_index()
 
 
 @lru_cache(maxsize=None)
@@ -233,8 +244,36 @@ def incomes() -> pd.DataFrame:
     df = pd.DataFrame({
         "median_household": _census_median("h05", "All Races"),
         "median_married_couple": _census_median("f07ar", "Married-Couple Families"),
+        # Alternative benchmarks, used in adi/disconnect.py.
+        "median_married_with_children": _census_median(
+            "f10ar", "Married-Couple Families", "One or More Children Under 18 Years Old"),
+        "median_family_one_earner": _census_median("f12ar", "One Earner"),
+        "median_family_two_earners": _census_median("f12ar", "Two Earners"),
+        "median_family_head_25_34": _census_median("f11ar", "25 to 34 Years"),
+        "median_family_head_35_44": _census_median("f11ar", "35 to 44 Years"),
     })
     df["median_ft_earnings"] = fred("ft_weekly_earnings") * 52
+    df.index.name = "year"
+    return df
+
+
+def household_mix() -> pd.DataFrame:
+    """Households (thousands) and the share that are married couples, and
+    married couples with own children under 18 (Census HH-1 and FM-1)."""
+    def table(name: str, cols: dict[int, str]) -> pd.DataFrame:
+        x = pd.read_excel(sources.fetch_census_families(name), header=None)
+        rows = {}
+        for _, r in x.iterrows():
+            lab = str(r[0]).strip()
+            if lab[:4].isdigit() and int(lab[:4]) not in rows:
+                rows[int(lab[:4])] = {v: float(r[k]) for k, v in cols.items()}
+        return pd.DataFrame.from_dict(rows, orient="index").sort_index()
+
+    hh = table("hh1", {1: "households", 3: "married_couples"})
+    fm = table("fm1", {3: "married_with_children"})
+    df = hh.join(fm)
+    df["share_married"] = df["married_couples"] / df["households"]
+    df["share_married_with_children"] = df["married_with_children"] / df["households"]
     df.index.name = "year"
     return df
 

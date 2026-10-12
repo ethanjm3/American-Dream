@@ -43,6 +43,8 @@ def payload(results: dict[str, pd.DataFrame], cfg: dict) -> dict:
         "median_household": col(summary[summary.scenario == "A"], "median_household"),
         "median_married_couple": col(summary[summary.scenario == "A"], "median_married_couple"),
         "median_ft_earnings": col(summary[summary.scenario == "A"], "median_ft_earnings"),
+        "median_married_with_children": [round(float(v)) for v in data.incomes()["median_married_with_children"].reindex(years)],
+        "median_family_head_25_34": [round(float(v)) for v in data.incomes()["median_family_head_25_34"].reindex(years)],
         "retired_core": col(spend, "core"),
         "health_pre65": col(spend, "health_pre65"),
         "health_65plus": col(spend, "health_65plus"),

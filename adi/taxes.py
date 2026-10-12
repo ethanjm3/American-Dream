@@ -30,7 +30,7 @@ from . import data, sources
 # Gross incomes run at, as multiples of the year's median married-couple
 # income. Keeping the grid independent of modeled spending lets the TAXSIM
 # cache survive assumption changes that don't touch deductions.
-GRID = np.round(np.linspace(0.5, 3.5, 16), 4)
+GRID = np.round(np.linspace(0.5, 4.5, 21), 4)
 CACHE_DIR = sources.RAW / "taxsim"
 
 

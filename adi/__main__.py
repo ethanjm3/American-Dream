@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import argparse
 
-from . import charts, data, index, web
+from . import charts, data, disconnect, index, web
 
 
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="adi", description="American Dream Index")
     p.add_argument("command", nargs="?", default="all",
-                   choices=["fetch", "build", "charts", "web", "all"])
+                   choices=["fetch", "build", "charts", "web", "disconnect", "all"])
     p.add_argument("--config", default=index.DEFAULT_CONFIG)
     p.add_argument("--refresh", action="store_true", help="re-download raw data")
     args = p.parse_args(argv)
@@ -20,6 +20,12 @@ def main(argv: list[str] | None = None) -> None:
         if args.command == "fetch":
             return
     cfg = index.load_config(args.config)
+    if args.command == "disconnect":
+        out = disconnect.run(cfg)
+        for path in out["_charts"]:
+            print(f"wrote {path.relative_to(index.ROOT)}")
+        print(out["decomposition"].round(3).to_string(index=False))
+        return
     results = index.build(cfg)
     index.save(results)
     if args.command in ("charts", "all"):

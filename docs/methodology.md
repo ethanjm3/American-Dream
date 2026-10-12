@@ -204,7 +204,7 @@ after-tax cost (all of the above).
   credit and every other provision of each year's law.
 * **State tax**: run for all 50 states and DC and averaged with each year's
   state population as weights (Census estimates via FRED).
-* Each year is run at 16 incomes from 0.5× to 3.5× median married-couple
+* Each year is run at 21 incomes from 0.5× to 4.5× median married-couple
   income, and the required income is found by interpolation. Results are
   cached in `data/raw/taxsim/`.
 * TAXSIM 35 covers tax law through 2023. For 2024–2025 the model applies

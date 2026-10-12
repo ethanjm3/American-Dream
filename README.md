@@ -42,15 +42,24 @@ median full-time paychecks (BLS) the lifestyle requires.
 * **The full lifestyle has never been within reach of the median family.**
   The two-earner version takes 1.4–2.3× the median married couple's income
   in every year (peaking at 2.3× in 1981); the one-earner version never less than 1.15×.
-* **In real terms its cost has barely moved** ($180K–$220K in 2025 dollars),
-  but what goes into it has. Childcare (+$9K), healthcare (+$7K) and
-  retirement saving (+$7K, longer lives and the loss of pensions) cost more;
-  taxes (−$6K) and clothing, furnishings and other goods (−$4K) cost less.
-  Housing swung from $43K (14% mortgages in 1980) to $34K (2019) to $49K (2025).
-* **Married-couple incomes rose faster than the cost**, mostly because more
-  couples have two earners, so the share fell from 220% in 1980 to a low of
-  142% in 2021 before higher mortgage rates and home prices pushed it back
-  to 165%.
+* **It did not get cheaper per worker.** It cost 3.7 median full-time
+  paychecks in 1980, 3.4 in 1985 and 3.5 in 2025. It looks cheaper against
+  married couples' income because couples now bring in 2.1 paychecks instead
+  of 1.7 (three-quarters of the improvement since 1980), and married parents
+  are a smaller, better-off group (17% of households, down from 31%).
+* **The mix shifted.** Childcare, health insurance and retirement saving each
+  take about 0.1 more paychecks than in 1980; cars, clothing, food and above
+  all taxes take fewer. Excluding taxes, the lifestyle costs exactly 2.69
+  paychecks in both 1980 and 2025.
+* **It got worse recently.** Since 2019 the cost per paycheck is up 6% (19%
+  since 2021), all of it housing; home prices are a record 4.8× median
+  household income.
+
+Why the index and the popular perception differ, with every number
+decomposed: [`docs/disconnect.md`](docs/disconnect.md).
+
+![Yardsticks](charts/05_yardsticks.png)
+![Paycheck changes](charts/06_paycheck_changes.png)
 
 Charts are in [`charts/`](charts), the year-by-year numbers in
 [`data/processed/summary.csv`](data/processed/summary.csv), and an
@@ -92,6 +101,7 @@ Every assumption is in [`config/assumptions.toml`](config/assumptions.toml).
 pip install -r requirements.txt
 python -m adi all          # build data, charts and the web page
 python -m adi build        # just the numbers -> data/processed/
+python -m adi disconnect   # yardstick, decomposition and sensitivity analysis
 python -m adi fetch --refresh   # re-download every raw source
 python -m pytest
 ```

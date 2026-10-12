@@ -91,6 +91,27 @@ def plan_horizon(years: pd.Index, cfg: dict) -> pd.Series:
     return (65 + longest + cfg["retirement"]["longevity_buffer_years"]).reindex(years)
 
 
+def real_returns(years: pd.Index, cfg: dict) -> pd.DataFrame:
+    """Real returns while saving and in retirement, by year.
+
+    The default is fixed rates. With ``real_return_accumulation = "market"``
+    they follow the real 10-year Treasury yield of each year (10-year yield
+    minus the Cleveland Fed's 10-year expected inflation; 1980-81 use 1982's
+    expected inflation) plus a stock premium for each phase's equity share.
+    """
+    r = cfg["retirement"]
+    if r["real_return_accumulation"] != "market":
+        return pd.DataFrame({"accumulation": float(r["real_return_accumulation"]),
+                             "retirement": float(r["real_return_retirement"])}, index=years)
+    nominal = data.fred("GS10").reindex(years)
+    expected = data.fred("EXPINF10YR").reindex(years).bfill()
+    real = (nominal - expected) / 100
+    premium = r["market_equity_premium"]
+    acc = (real + r["market_stock_share_saving"] * premium).clip(0.005, 0.09)
+    ret = (real + r["market_stock_share_retired"] * premium).clip(0.0, 0.09)
+    return pd.DataFrame({"accumulation": acc, "retirement": ret, "real_10y": real})
+
+
 def savings_required(costs: pd.DataFrame, incomes: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     """Annual retirement saving needed, by year and scenario ("A" two earners, "B" one)."""
     r, hh = cfg["retirement"], cfg["household"]
@@ -100,6 +121,9 @@ def savings_required(costs: pd.DataFrame, incomes: pd.DataFrame, cfg: dict) -> p
     db = _ref_series("db_pension", "db_share").reindex(
         range(min(years.min(), 1975), years.max() + 1)).interpolate(limit_direction="both").reindex(years)
     earnings = incomes["median_ft_earnings"].reindex(years)
+    rates = real_returns(years, cfg)
+    payable = r.get("ss_payable_share", 1.0)
+    depletion = r.get("ss_depletion_year", 9999)
 
     rows = []
     for y in years:
@@ -107,10 +131,15 @@ def savings_required(costs: pd.DataFrame, incomes: pd.DataFrame, cfg: dict) -> p
         fra = full_retirement_age(birth)
         claim = r["ss_claim_age"]
         pia = r["ss_pia_replacement"] * earnings[y]
+        # Benefits claimed after the trust fund is projected to run out are
+        # cut to the payable share (1.0 = scheduled benefits, the default).
+        if y + claim - hh["parent_age"] >= depletion:
+            pia *= payable
+        r_acc, r_ret = rates.at[y, "accumulation"], rates.at[y, "retirement"]
         ages = np.arange(r["retire_age"], horizon[y], 1.0)
-        disc = (1 + r["real_return_retirement"]) ** -(ages - r["retire_age"])
+        disc = (1 + r_ret) ** -(ages - r["retire_age"])
         n_save = r["retire_age"] - r["start_saving_age"]
-        annuity = ((1 + r["real_return_accumulation"]) ** n_save - 1) / r["real_return_accumulation"]
+        annuity = ((1 + r_acc) ** n_save - 1) / r_acc
         for scen, earners in (("A", 2), ("B", 1)):
             if earners == 2:
                 ss = 2 * pia * worker_claim_factor(claim, fra)

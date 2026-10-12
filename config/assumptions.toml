@@ -166,6 +166,15 @@ real_return_retirement = 0.030
 couple_share_food = 0.55
 couple_share_goods = 0.75
 db_pension_replacement = 0.25   # pension as share of earnings for a covered worker
+# Set real_return_accumulation = "market" to use each year's real 10-year
+# Treasury yield plus a stock premium instead of fixed returns.
+market_equity_premium = 0.04
+market_stock_share_saving = 0.6
+market_stock_share_retired = 0.3
+# Social Security: 1.0 = scheduled benefits. The 2025 Trustees project the
+# retirement trust fund to run out in 2033, after which ~77% is payable.
+ss_payable_share = 1.0
+ss_depletion_year = 2033
 # Retiree health insurance before Medicare: share of the total (employer +
 # worker) family premium a couple pays on the individual market.
 pre_medicare_premium_share = 0.85

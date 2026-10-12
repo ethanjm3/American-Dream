@@ -153,7 +153,31 @@ CENSUS_TABLES = {
     "h05": "historical-income-households/h05.xlsx",
     # Families by type (married-couple), median income.
     "f07ar": "historical-income-families/f07ar.xlsx",
+    # Families by type and presence of children under 18.
+    "f10ar": "historical-income-families/f10ar.xlsx",
+    # Families by age of householder.
+    "f11ar": "historical-income-families/f11ar.xlsx",
+    # Families by number of earners.
+    "f12ar": "historical-income-families/f12ar.xlsx",
 }
+
+
+CENSUS_FAMILIES_BASE = "https://www2.census.gov/programs-surveys/demo/tables/families/time-series/"
+CENSUS_FAMILY_TABLES = {
+    # Households by type (married couples), 1940-present.
+    "hh1": "households/hh1.xls",
+    # Families by presence of own children under 18, 1950-present.
+    "fm1": "families/fm1.xls",
+}
+
+
+def fetch_census_families(table: str, refresh: bool = False) -> Path:
+    path = RAW / "census" / f"{table}.xls"
+    if path.exists() and not refresh:
+        return path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(_get(CENSUS_FAMILIES_BASE + CENSUS_FAMILY_TABLES[table]).content)
+    return path
 
 
 def fetch_census(table: str, refresh: bool = False) -> Path:

@@ -97,8 +97,11 @@ def _terms(expr: str):
 
 def housing(cfg: dict, years: pd.Index) -> pd.DataFrame:
     h, ay = cfg["housing"], cfg["model"]["anchor_year"]
-    hpi = data.fred("hpi").reindex(years)
-    price = h["anchor_price"] * hpi / data.fred("hpi")[ay]
+    # Default: FHFA repeat-sales index (constant quality). "MEDIAN_NEW_HOME"
+    # follows the median price of new houses sold instead, so homes get
+    # bigger and better over time as they actually did.
+    series = data.fred("median_new_home" if h.get("price_index") == "MEDIAN_NEW_HOME" else "hpi")
+    price = h["anchor_price"] * series.reindex(years) / series[ay]
     rate = data.fred("mortgage_rate").reindex(years)
     loan = price * (1 - h["down_payment"])
     out = pd.DataFrame(index=years)
