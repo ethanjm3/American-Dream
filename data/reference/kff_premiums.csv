@@ -1,9 +1,34 @@
-# PROVISIONAL - replace with verified KFF EHBS series
+# Average annual premiums for employer family coverage: worker contribution
+# and total (worker + employer), current dollars.
+# Source: KFF Employer Health Benefits Survey 2025, Figure 6.5 (Tables-EHBS-2025-Section-06.xlsx).
+#   https://files.kff.org/attachment/Tables-EHBS-2025-Section-06.xlsx
+# The 2025 edition restated the full history after dropping firms with 3-9
+# workers from the survey universe; this file uses the restated series.
 year,worker_family,total_family
-1999,1543,5791
-2005,2713,10880
-2010,3997,13770
-2015,4955,17545
-2020,5588,21342
-2024,6296,25572
+1999,1563,5809
+2000,1625,6415
+2001,1800,7098
+2002,2161,8015
+2003,2432,9113
+2004,2652,9950
+2005,2692,10962
+2006,2971,11535
+2007,3280,12084
+2008,3328,12688
+2009,3513,13375
+2010,4013,13890
+2011,4186,15220
+2012,4340,15829
+2013,4591,16377
+2014,4870,16953
+2015,4993,17680
+2016,5269,18217
+2017,5748,18870
+2018,5556,19718
+2019,5990,20646
+2020,5567,21419
+2021,5927,22186
+2022,6084,22419
+2023,6519,23944
+2024,6366,25586
 2025,6850,26993

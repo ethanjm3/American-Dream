@@ -273,7 +273,7 @@ const ADI = /*__ADI_DATA__*/null;
       for (const k in it) items[k] = it[k][i];
       items.mortgage_payment = pmt(price * (1 - S.down), P.mortgage_rate[i], A0.mortgage_term_years);
       items.down_payment_saving = price * S.down / A0.down_payment_save_years;
-      items.property_tax = price * A0.property_tax_rate;
+      items.property_tax = price * P.property_tax_rate[i];
       items.home_maintenance = price * A0.maintenance_rate;
       items.childcare = scen === "A" ? it.childcare[i] * S.care : 0;
       const cat = {};
@@ -369,8 +369,12 @@ const ADI = /*__ADI_DATA__*/null;
       el("line", { x1: m.l, x2: m.l + iw, y1: yv(v), y2: yv(v), class: v === 0 ? "base" : "grid" }, svg);
       el("text", { x: m.l - 8, y: yv(v) + 4, "text-anchor": "end" }, svg, opts.fmtAxis(v));
     });
-    for (let i = 0; i < N; i++) if ((Y[i] % 10 === 0) || i === N - 1)
-      el("text", { x: x(i), y: H - 6, "text-anchor": i === N - 1 ? "end" : "middle" }, svg, Y[i]);
+    for (let i = 0; i < N; i++) {
+      const isLast = i === N - 1;
+      if (!(Y[i] % 10 === 0 || isLast)) continue;
+      if (!isLast && x(N - 1) - x(i) < 44) continue;  // keep clear of the final year's label
+      el("text", { x: x(i), y: H - 6, "text-anchor": isLast ? "end" : "middle" }, svg, Y[i]);
+    }
     (opts.refs || []).forEach(r => {
       el("line", { x1: m.l, x2: m.l + iw, y1: yv(r.value), y2: yv(r.value), class: "ref" }, svg);
       el("text", { x: m.l + 4, y: yv(r.value) - 5, class: "ref-label" }, svg, r.label);
@@ -414,7 +418,8 @@ const ADI = /*__ADI_DATA__*/null;
     const svg = document.getElementById("ch-mix"), card = svg.closest(".card");
     const W = svg.clientWidth || 900, H = 320, m = { l: 52, r: 12, t: 22, b: 26 };
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.textContent = "";
-    const pick = rows.filter(r => r.year % 5 === 0 || r.year === LATEST);
+    let pick = rows.filter(r => r.year % 5 === 0 || r.year === LATEST);
+    if ((W - m.l - m.r) / pick.length < 48) pick = rows.filter(r => r.year % 10 === 0 || r.year === LATEST);
     const colors = SERIES(), iw = W - m.l - m.r, ih = H - m.t - m.b;
     const totals = pick.map(r => CATS.reduce((a, c) => a + r.vals[c], 0));
     const maxV = niceMax(Math.max(...totals) * 1.08);
@@ -436,7 +441,7 @@ const ADI = /*__ADI_DATA__*/null;
         acc += v;
       });
       el("rect", { x: cx - band / 2, y: m.t, width: band, height: ih, fill: "transparent" }, g);
-      el("text", { x: cx, y: yv(totals[j]) - 6, "text-anchor": "middle", class: "end-label" }, svg, money(totals[j]));
+      if (band >= 40) el("text", { x: cx, y: yv(totals[j]) - 6, "text-anchor": "middle", class: "end-label" }, svg, money(totals[j]));
       el("text", { x: cx, y: H - 6, "text-anchor": "middle" }, svg, r.year);
       const show = () => {
         fillTip(tip, `${r.year} · ${money(totals[j])}`, CATS.slice().reverse().map(c => ({
@@ -460,18 +465,18 @@ const ADI = /*__ADI_DATA__*/null;
     const lede = document.getElementById("lede");
     lede.textContent = "";
     const parts = [
-      ["In " + LATEST + ", a house, two cars, childcare, vacations, and retirement at " + S.retire + " took ", false],
-      [moneyFull(last.cost) + " a year before taxes", true],
-      [" — " + pct(last.pctMarried) + " of what the median married couple earned, or ", false],
+      ["In " + LATEST + ", a house, two cars, " + (S.scen === "A" ? "childcare, " : "") + "vacations and retirement at " + S.retire + " took ", false],
+      [moneyFull(last.cost) + " a year in pre-tax income", true],
+      [". That is " + pct(last.pctMarried) + " of what the median married couple earned, or ", false],
       [last.earners.toFixed(1) + " full-time median paychecks", true],
       [". In " + FIRST + " it took " + first.earners.toFixed(1) + ".", false],
     ];
     parts.forEach(([t, strong]) => { const n = strong ? document.createElement("strong") : document.createTextNode(t); if (strong) n.textContent = t; lede.appendChild(n); });
-    if (S.scen === "B") lede.appendChild(document.createTextNode(" (One earner, parent at home: no childcare bill.)"));
+    if (S.scen === "B") lede.appendChild(document.createTextNode(" This is the one-earner household, with a parent at home instead of paid childcare."));
 
     const figs = document.getElementById("figures"); figs.textContent = "";
     [
-      [moneyFull(last.cost / deflate(N - 1) * (real ? 1 : 1)), `Pre-tax cost, ${LATEST}`],
+      [moneyFull(last.cost / deflate(N - 1)), `Pre-tax cost, ${LATEST}`],
       [moneyFull(first.cost / deflate(0)), `Pre-tax cost, ${FIRST}` + (real ? ` (in ${LATEST} $)` : "")],
       [pct(first.pctMarried) + " → " + pct(last.pctMarried), "Share of median married-couple income"],
       [first.earners.toFixed(2) + " → " + last.earners.toFixed(2), "Median full-time paychecks needed"],

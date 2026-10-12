@@ -31,10 +31,32 @@ median full-time paychecks (BLS) the lifestyle requires.
 
 ## Results
 
+| | 1980 | 2019 | 2025 |
+|---|---|---|---|
+| Pre-tax cost, two earners + childcare (2025 $) | $198,700 | $196,400 | $217,800 |
+| Median married-couple income (2025 $) | $90,400 | $128,400 | $132,100 |
+| Cost as share of that income: two earners | 220% | 153% | 165% |
+| Cost as share of that income: one earner, parent at home | 185% | 125% | 136% |
+| Full-time median paychecks needed: two earners | 3.7 | 3.3 | 3.5 |
+
+* **The full lifestyle has never been within reach of the median family.**
+  The two-earner version takes 1.4–2.3× the median married couple's income
+  in every year (peaking at 2.3× in 1981); the one-earner version never less than 1.15×.
+* **In real terms its cost has barely moved** ($180K–$220K in 2025 dollars),
+  but what goes into it has. Childcare (+$9K), healthcare (+$7K) and
+  retirement saving (+$7K, longer lives and the loss of pensions) cost more;
+  taxes (−$6K) and clothing, furnishings and other goods (−$4K) cost less.
+  Housing swung from $43K (14% mortgages in 1980) to $34K (2019) to $49K (2025).
+* **Married-couple incomes rose faster than the cost**, mostly because more
+  couples have two earners, so the share fell from 220% in 1980 to a low of
+  142% in 2021 before higher mortgage rates and home prices pushed it back
+  to 165%.
+
 Charts are in [`charts/`](charts), the year-by-year numbers in
 [`data/processed/summary.csv`](data/processed/summary.csv), and an
 interactive version (sliders for retirement age, returns, home prices, down
-payment and childcare) in [`web/index.html`](web/index.html).
+payment and childcare) in [`web/index.html`](web/index.html), published at
+https://claude.ai/artifact/QegXtAQLvniovHtacvvmdV.
 
 ![Cost vs income](charts/01_cost_vs_income.png)
 ![Share of income](charts/02_share_of_income.png)

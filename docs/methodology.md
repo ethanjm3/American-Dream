@@ -75,25 +75,41 @@ these back to the item CPI.
   average rate (`MORTGAGE30US`). Payment is principal and interest.
 * **Down payment**: saved over the 10 years before buying (20% of the price ÷ 10
   per year).
-* **Property tax** 1.0% and **maintenance** 1.0% of value per year.
-* **Homeowners insurance**: 2024 average premium, carried on the CPI for
-  tenants' and household insurance (1998+), core CPI before.
+* **Property tax**: the national effective rate on owner-occupied homes,
+  1.28% in 1980 (ACIR, *Significant Features of Fiscal Federalism*, homes
+  with FHA-insured mortgages, 1980–87), 1.13% in 2000 (Census 2000 SF3) and
+  0.89% in 2024 (ACS: aggregate real estate taxes ÷ aggregate value),
+  interpolated between.
+* **Maintenance**: 1.0% of value per year.
+* **Homeowners insurance**: the NAIC average HO-3 premium (2008–2023; $1,737
+  in 2023), carried back on the CPI for tenants' and household insurance
+  (1998+) and core CPI before that, and forward on the same CPI.
 * **Utilities**: CE married couples with children, "utilities, fuels and
   public services" less telephone, carried on the CPI for fuels and utilities.
 
 ### Transportation (two cars, 15,000 miles each)
 
-AAA *Your Driving Costs* 2024, per new vehicle: depreciation, finance,
-fuel, insurance, maintenance/repair/tires, and license/registration/taxes.
-Fuel, insurance, maintenance and fees follow their CPI components.
-Finance cost also moves with the Fed's 48-month new-car loan rate
-(`TERMCBAUTO48NS`).
+The **level** is AAA *Your Driving Costs*: the average annual cost to own
+and operate a new car driven 15,000 miles, as published every year (BTS
+National Transportation Statistics Table 3-17: $3,176 in 1980, $7,363 in
+2000, $12,296 in 2024, $11,578 in 2025; 1981–84 and 1986–89 interpolated).
+The **mix** comes from AAA's 2024 breakdown (depreciation $4,680, finance
+$1,332, fuel $2,235, insurance $1,715, maintenance $1,520, fees $815), with
+each piece moved on its CPI component (finance also on the Fed's 48-month
+new-car loan rate, `TERMCBAUTO48NS`) and then scaled so the pieces sum to
+AAA's total for the year. AAA's own figures replace the new-vehicle CPI here
+because that index is quality-adjusted: it rose 2× from 1980 to 2024 while
+AAA's ownership cost rose 3.9×. AAA changed method in 1985, 2004 and 2017
+(adding SUVs and pickups to the sedan-only average in 2017).
 
 ### Childcare
 
-Child Care Aware of America 2024 national average price of centre care for
-an infant and a preschooler, carried on the CPI for day care and preschool
-(1991+). Before 1991 the only CPI that includes childcare is dominated by
+Child Care Aware of America's national average price of full-time centre
+care: infant $15,395 and 4-year-old $12,345 in 2024. (CCAoA publishes
+per-age figures for 2025, $15,460 and $12,397 as the mean of its three
+methods; they are carried to 2024 with its national averages, $13,128 for
+2024 and $13,184 for 2025.) Other years follow the CPI for day care and
+preschool (1991+). Before 1991 the only CPI that includes childcare is dominated by
 college tuition (it rose 2.7× in 1980–91 while wages rose 1.5×), so childcare
 is carried back on average hourly earnings of production and nonsupervisory
 workers (`AHETPI`): childcare prices are mostly wages.
@@ -106,29 +122,38 @@ the CPI for each.
 ### Household goods
 
 A replacement reserve (price ÷ expected life) for a 60" TV, refrigerator,
-freezer, washer, dryer, microwave and range, plus furniture. Era-typical
-spending method (see above).
+freezer, washer, dryer, microwave and range, plus furniture. Refrigerator,
+washer and dryer prices are DOE installed costs for baseline models from its
+efficiency rulemakings; lives are NAHB's. Era-typical spending method (see
+above).
 
 ### Technology
 
-Two smartphones (device every three years plus a plan each), home internet
-and a cable package. Phone and internet follow CE telephone spending of
+Two smartphones (a $799 iPhone every three years, a $70/month plan each,
+the middle of FCC-reported list prices), home internet ($73/month, the
+USTelecom 2024 broadband price index) and a cable package ($105/month; no
+authoritative average bill exists, so this is a generic quote). Phone and internet follow CE telephone spending of
 married couples with children (era-typical: landline + long distance in the
 1980s); cable follows the CPI for cable, satellite and streaming TV.
 
 ### Healthcare
 
 The worker's share of an employer family plan premium from the KFF Employer
-Health Benefits Survey (1999 on). Before 1999, what CE married couples with
+Health Benefits Survey, 1999–2025 ($1,563 in 1999, $6,366 in 2024, $6,850 in
+2025; the series as restated in the 2025 edition). Before 1999, what CE married couples with
 children paid for health insurance (1988–98), then the CPI for medical care
-services. Out-of-pocket spending (CE healthcare less insurance) follows the
-medical care CPI.
+services. Out-of-pocket spending (CE healthcare less insurance: $2,827 in 2024)
+follows the medical care CPI. This is on the low side: Milliman's Medical
+Index puts out-of-pocket costs for a family of four in a typical employer
+plan at about $4,900 in 2023–24.
 
 ### Vacations
 
-A family of four: one domestic trip a year (airfare, 6 hotel nights, meals and
-activities) and one international trip every five years (8 nights), on the
-CPI for airline fares, hotels and food away from home.
+A family of four: one domestic trip a year (round-trip airfare at the BTS
+2024 average of $467, 6 nights at the CoStar 2024 average daily rate of $159,
+meals and activities) and one international trip every five years (US–Europe
+fares about $900 per person in summer 2024, 8 nights), on the CPI for airline
+fares, hotels and food away from home.
 
 ### Other necessities
 
@@ -227,7 +252,11 @@ after-tax cost (all of the above).
 | Full-time earnings | BLS CPS via FRED | `LEU0252881500A` |
 | State population | Census via FRED | `{ST}POP` |
 | Taxes | NBER TAXSIM 35 | taxsim.nber.org |
-| Health premiums | KFF Employer Health Benefits Survey | worker contribution, family coverage |
+| Health premiums | KFF Employer Health Benefits Survey 2025 | Figure 6.5, family coverage |
+| Car costs | AAA *Your Driving Costs* via BTS | National Transportation Statistics Table 3-17 |
+| Homeowners insurance | NAIC Homeowners Insurance Report | average HO-3 premium |
+| Property tax rates | ACIR; Census 2000; ACS | SFFF tables; SF3; B25090/B25082 |
+| Childcare prices | Child Care Aware of America | Price & Supply 2024 and 2025 |
 | Life expectancy | SSA 2026 Trustees Report | Table V.A4 |
 | Pension coverage | DOL Private Pension Plan Bulletin; BLS NCS | Table E4; `NBU29000000000000026291` |
 | Social Security | SSA | Trustees Report Table V.C7; early-retirement reduction schedule |

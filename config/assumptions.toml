@@ -29,10 +29,14 @@ down_payment = 0.20
 down_payment_save_years = 10            # years spent saving the down payment
 mortgage_term_years = 30
 interest_averaging_years = 10           # years of interest used for the tax deduction
-property_tax_rate = 0.0100              # effective rate on market value
+# Effective rate on market value: ACIR (1980-87), Census 2000, ACS (2023-24),
+# interpolated. A number here applies one rate to every year.
+property_tax_rate = "reference:property_tax_rate"
 maintenance_rate = 0.010                # 1% of value per year rule of thumb
-# Homeowners insurance, average annual premium (anchor year).
-insurance_anchor = 2230
+# Homeowners insurance: NAIC average HO-3 premium (2008-2023), extended on
+# the CPI for tenants' and household insurance. A number here is used as the
+# anchor-year premium instead.
+insurance_anchor = "reference:home_insurance"
 # Electricity, gas, fuel oil, water and trash: CE married couples with
 # children, "utilities, fuels and public services" less telephone services.
 utilities_anchor = "ce:UTILS-PHONE"
@@ -41,7 +45,11 @@ utilities_anchor = "ce:UTILS-PHONE"
 [transportation]
 cars = 2
 miles_per_car = 15000
-# AAA "Your Driving Costs" 2024, new vehicle, 15k mi/yr, per car.
+# AAA "Your Driving Costs" 2024, new vehicle, 15k mi/yr, per car. The
+# components move with their CPIs, then are scaled each year so they sum to
+# AAA's published total for that year (BTS NTS Table 3-17). Remove
+# total_per_car to use the CPI components alone.
+total_per_car = "reference:aaa_driving_costs"
 depreciation_anchor = 4680
 finance_anchor = 1332
 fuel_anchor = 2235
@@ -51,9 +59,12 @@ fees_anchor = 815
 
 # ---------------------------------------------------------------- childcare
 [childcare]
-# Child Care Aware of America, national average center-based price, 2024.
-infant_anchor = 15000
-preschool_anchor = 12000
+# Child Care Aware of America, national average price of full-time centre
+# care. CCAoA publishes per-age figures for 2025 (mean of its three methods:
+# infant $15,460, 4-year-old $12,397); these are carried to 2024 with its
+# published national averages ($13,128 / $13,184).
+infant_anchor = 15395
+preschool_anchor = 12345
 # Share of a full year both children are in paid care (1.0 = peak years).
 intensity = 1.0
 
@@ -74,22 +85,25 @@ furnishings_index = "CE_FURNITURE"
 # 2024-quality 60" TV "cost" ~$50,000 in 1980), so these items follow what
 # married couples with children actually spent on the category (BLS CE).
 [household_goods.items]
+# Prices: DOE installed costs for baseline models (2022$, efficiency
+# rulemakings) for the refrigerator (French door), washer and dryer; typical
+# retail prices for the rest. Lives: NAHB.
 television_60in   = { price = 550,  life = 8,  index = "CE_TVAUDIO" }
-refrigerator      = { price = 1800, life = 13, index = "CE_MAJOR_APPLIANCES" }
-freezer           = { price = 450,  life = 12, index = "CE_MAJOR_APPLIANCES" }
-washer            = { price = 850,  life = 11, index = "CE_MAJOR_APPLIANCES" }
-dryer             = { price = 750,  life = 12, index = "CE_MAJOR_APPLIANCES" }
+refrigerator      = { price = 1461, life = 13, index = "CE_MAJOR_APPLIANCES" }
+freezer           = { price = 450,  life = 11, index = "CE_MAJOR_APPLIANCES" }
+washer            = { price = 690,  life = 10, index = "CE_MAJOR_APPLIANCES" }
+dryer             = { price = 656,  life = 13, index = "CE_MAJOR_APPLIANCES" }
 microwave         = { price = 180,  life = 9,  index = "CE_SMALL_APPLIANCES" }
 range_oven        = { price = 1000, life = 14, index = "CE_MAJOR_APPLIANCES" }
 
 # --------------------------------------------------------------- technology
 [technology]
 smartphones = 2
-smartphone_price = 800
+smartphone_price = 799            # iPhone 16 base price (Apple, Sept 2024)
 smartphone_life_years = 3
-wireless_per_line_month = 70
-internet_month = 75
-cable_month = 105            # "generic cable quote"
+wireless_per_line_month = 70      # FCC 2024 list prices: $60-$90 for one line
+internet_month = 73               # USTelecom Broadband Pricing Index 2024: $72.58
+cable_month = 105                 # generic cable/satellite package (no authoritative average)
 
 # --------------------------------------------------------------- healthcare
 [healthcare]
@@ -104,12 +118,12 @@ out_of_pocket_anchor = "ce:HEALTH-HLTHINSR"
 [vacations]
 travelers = 4
 domestic_trips_per_year = 1
-domestic_airfare_per_person = 400
+domestic_airfare_per_person = 467       # BTS average round-trip domestic fare, 2024
 domestic_nights = 6
-domestic_lodging_per_night = 180
+domestic_lodging_per_night = 159        # CoStar US hotel ADR 2024: $158.67
 domestic_daily_food_activities = 200
 international_every_years = 5
-international_airfare_per_person = 1100
+international_airfare_per_person = 900  # US-Europe round trip, summer 2024 (Hopper)
 international_nights = 8
 international_lodging_per_night = 220
 international_daily_food_activities = 300

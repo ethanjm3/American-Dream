@@ -108,11 +108,29 @@ def housing(cfg: dict, years: pd.Index) -> pd.DataFrame:
     out["mortgage_interest"] = average_interest(
         loan, rate, h["mortgage_term_years"], h["interest_averaging_years"])
     out["down_payment_saving"] = price * h["down_payment"] / h["down_payment_save_years"]
-    out["property_tax"] = price * h["property_tax_rate"]
-    out["home_insurance"] = _carry(h["insurance_anchor"], "HOME_INSURANCE", years, ay)
+    out["property_tax_rate"] = _rate_series(h["property_tax_rate"], years)
+    out["property_tax"] = price * out["property_tax_rate"]
+    out["home_insurance"] = home_insurance(h, years, ay)
     out["home_maintenance"] = price * h["maintenance_rate"]
     out["utilities"] = _carry(anchor_value(h["utilities_anchor"], ay), "UTILITIES", years, ay)
     return out
+
+
+def _rate_series(spec, years: pd.Index) -> pd.Series:
+    """A constant rate, or ``"reference:NAME"`` interpolated from data/reference."""
+    if isinstance(spec, (int, float)):
+        return pd.Series(float(spec), index=years)
+    ref = data.reference(spec.split(":", 1)[1]).set_index("year")["rate"].astype(float)
+    full = ref.reindex(range(min(ref.index.min(), years.min()), max(ref.index.max(), years.max()) + 1))
+    return full.interpolate(limit_direction="both").reindex(years)
+
+
+def home_insurance(h: dict, years: pd.Index, ay: int) -> pd.Series:
+    """NAIC average HO-3 premium where published, extended on the insurance CPI."""
+    if h["insurance_anchor"] != "reference:home_insurance":
+        return _carry(anchor_value(h["insurance_anchor"], ay), "HOME_INSURANCE", years, ay)
+    naic = data.reference("home_insurance").set_index("year")["ho3_premium"].astype(float)
+    return data.splice([naic, data.price_index("HOME_INSURANCE", ay)]).reindex(years)
 
 
 def _loan_cost_factor(rate_pct, months: int = 60) -> np.ndarray:
@@ -133,6 +151,15 @@ def transportation(cfg: dict, years: pd.Index) -> pd.DataFrame:
     out["car_insurance"] = n * _carry(t["insurance_anchor"], "AUTO_INSURANCE", years, ay)
     out["car_maintenance"] = n * _carry(t["maintenance_anchor"], "AUTO_MAINTENANCE", years, ay)
     out["car_fees"] = n * _carry(t["fees_anchor"], "AUTO_FEES", years, ay)
+    if t.get("total_per_car") == "reference:aaa_driving_costs":
+        # Scale the components so they sum to AAA's published total for the
+        # year: the CPI pieces set the mix, AAA sets the level.
+        aaa = data.reference("aaa_driving_costs").set_index("year")["total_per_car"].astype(float)
+        full = aaa.reindex(range(aaa.index.min(), max(aaa.index.max(), years.max()) + 1))
+        aaa = np.exp(np.log(full).interpolate(limit_area="inside")).reindex(years)
+        if aaa.isna().any():
+            raise ValueError("AAA driving costs do not cover the model years")
+        out = out.mul(n * aaa / out.sum(axis=1), axis=0)
     return out
 
 

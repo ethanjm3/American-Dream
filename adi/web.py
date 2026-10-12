@@ -38,6 +38,7 @@ def payload(results: dict[str, pd.DataFrame], cfg: dict) -> dict:
         "year": years,
         "cpi": col(results["cpi"], "cpi", 5),
         "home_price": col(costs, "home_price"),
+        "property_tax_rate": col(costs, "property_tax_rate", 6),
         "mortgage_rate": col(costs, "mortgage_rate", 3),
         "median_household": col(summary[summary.scenario == "A"], "median_household"),
         "median_married_couple": col(summary[summary.scenario == "A"], "median_married_couple"),
@@ -75,7 +76,6 @@ def payload(results: dict[str, pd.DataFrame], cfg: dict) -> dict:
             "down_payment": h["down_payment"],
             "down_payment_save_years": h["down_payment_save_years"],
             "mortgage_term_years": h["mortgage_term_years"],
-            "property_tax_rate": h["property_tax_rate"],
             "maintenance_rate": h["maintenance_rate"],
         },
     }
