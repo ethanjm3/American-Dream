@@ -1,0 +1,30 @@
+category,group,kind,annual_cost,assigned,spent_or_saved,shortfall,cash_overspent,available_dec,funded_share
+Mortgage payment,Housing,bill,25929.5437,25929.54,25929.54,0.0,0.0,0.0,1.0
+Utilities,Housing,bill,4447.9973,4447.99,4447.99,0.0,0.0,0.0,1.0
+Childcare,Childcare,bill,29161.167,29161.16,29161.16,0.0,0.0,0.0,1.0
+Health premium,Healthcare,bill,6850.0,6850.0,6850.0,0.0,0.0,0.0,1.0
+Car finance,Transportation,bill,2251.2967,2251.3,2251.3,0.0,0.0,0.0,1.0
+Communications,Technology,bill,3169.9378,3169.93,3169.93,0.0,0.0,0.0,1.0
+Tv and cable,Technology,bill,1289.078,1289.08,1289.08,0.0,0.0,0.0,1.0
+Property tax,Housing,annual,3757.4055,3757.41,3757.41,0.0,0.0,626.24,1.0
+Home insurance,Housing,annual,1877.7606,1877.76,1877.76,0.0,0.0,1408.32,1.0
+Car insurance,Transportation,annual,3436.6204,3436.62,3436.62,0.0,0.0,1431.93,1.0
+Car fees,Transportation,annual,1562.9925,1562.99,1562.99,0.0,0.0,911.75,1.0
+Groceries,Food,flex,9419.3593,9419.33,9419.33,0.0,0.0,0.0,1.0
+Car fuel,Transportation,flex,3983.4778,3983.47,3983.47,0.0,0.0,0.0,1.0
+Household supplies,Other necessities,flex,1231.5752,1231.54,1231.54,0.0,0.0,0.0,1.0
+Personal care,Other necessities,flex,1408.101,1408.08,1408.08,0.0,0.0,0.0,1.0
+Health out of pocket,Healthcare,sinking,2908.5298,2908.52,2908.52,0.0,0.0,0.0,1.0
+Home maintenance,Housing,sinking,4231.3125,738.7,738.7,3492.61,0.0,0.0,0.175
+Car maintenance,Transportation,sinking,3044.3933,507.4,507.4,2536.99,0.0,0.0,0.167
+Apparel,Other necessities,sinking,3208.2535,534.71,534.71,2673.55,0.0,0.0,0.167
+Restaurants,Food,flex,6194.9004,1032.48,1032.48,5162.4,0.0,0.0,0.167
+Entertainment,Other necessities,flex,4422.3814,737.06,737.06,3685.27,0.0,0.0,0.167
+Miscellaneous,Other necessities,flex,1524.0743,254.01,254.01,1270.04,0.0,0.0,0.167
+Appliances,Household goods,sinking,444.3255,74.05,74.05,370.27,0.0,0.0,0.167
+Furnishings,Household goods,sinking,813.866,135.64,135.64,678.22,0.0,67.82,0.167
+Vacation domestic,Vacations,sinking,4217.3737,702.89,702.89,3514.48,0.0,351.45,0.167
+Vacation international,Vacations,saving,1610.5209,268.42,268.42,1342.1,0.0,536.84,0.167
+Car depreciation,Transportation,saving,8877.2193,1479.54,1479.54,7397.68,0.0,2959.07,0.167
+Down payment saving,Housing,saving,8462.625,1410.44,1410.44,7052.19,0.0,2296.99,0.167
+Retirement saving,Retirement saving,saving,18487.6003,725.24,725.24,17762.36,0.0,0.0,0.039

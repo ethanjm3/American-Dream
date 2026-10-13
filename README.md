@@ -72,6 +72,21 @@ https://claude.ai/artifact/QegXtAQLvniovHtacvvmdV.
 ![Earners needed](charts/03_earners_needed.png)
 ![Breakdown](charts/04_breakdown_A.png)
 
+## The lifestyle on a YNAB budget
+
+`python -m adi budget` runs a household through a month-by-month zero-based
+budget. Its engine (`adi/budget/`) is a clean-room reimplementation of YNAB's
+rules, recovered with [REA](https://github.com/morluto/rea) from YNAB's
+public API contract, SDK and documentation. Sources and inferences are in
+[`docs/ynab-reverse-engineering.md`](docs/ynab-reverse-engineering.md).
+
+The budget gives every dollar a job, bills first, then necessities, then
+discretionary spending, then saving. At 2025's median married-couple income
+it funds 66% of the lifestyle for two earners and 77% for one. Every bill
+gets paid; what goes unfunded is retirement saving (4% and 17%), the next
+car, the down payment and vacations. At the income the index says the
+lifestyle requires, the same budget funds all of it.
+
 ## Method in brief
 
 * **Real historical series where they exist**: FHFA house price index, Freddie
@@ -102,6 +117,7 @@ pip install -r requirements.txt
 python -m adi all          # build data, charts and the web page
 python -m adi build        # just the numbers -> data/processed/
 python -m adi disconnect   # yardstick, decomposition and sensitivity analysis
+python -m adi budget --scenario A   # YNAB-style monthly budget (also --year, --gross)
 python -m adi fetch --refresh   # re-download every raw source
 python -m pytest
 ```
@@ -116,6 +132,7 @@ User-Agent: set `ADI_CONTACT_EMAIL` before `--refresh`.
 
 ```
 adi/            model code (sources, data, components, retirement, taxes, index, charts, web)
+adi/budget/     YNAB-style budget engine and household simulation
 config/         assumptions.toml
 data/raw/       cached downloads (FRED, BLS CPI & CE extracts, Census tables, TAXSIM)
 data/reference/ hand-collected series with sources in their headers
